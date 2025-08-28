@@ -222,7 +222,7 @@ export const PikachuGame = () => {
         
         {/* Player (Pikachu) */}
         <div
-          className={`absolute transition-none ${isJumping ? 'animate-float' : ''}`}
+          className={`absolute transition-none bg-transparent ${isJumping ? 'animate-float' : ''}`}
           style={{
             left: player.x,
             bottom: GAME_HEIGHT - player.y - player.height,
@@ -233,8 +233,7 @@ export const PikachuGame = () => {
           <img 
             src="/lovable-uploads/2c373f45-ab6b-45ba-a70a-8609e02d54cd.png"
             alt="Pikachu" 
-            className="w-full h-full object-contain animate-pulse-neon"
-            style={{ backgroundColor: 'transparent' }}
+            className="w-full h-full object-contain animate-pulse-neon bg-transparent"
           />
         </div>
 
