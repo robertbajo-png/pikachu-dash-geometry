@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import pikachuSprite from "@/assets/pikachu-sprite.png";
+import pikachuSprite from "@/assets/pikachu-transparent.png";
 
 interface GameObject {
   x: number;
@@ -235,6 +235,7 @@ export const PikachuGame = () => {
             src={pikachuSprite} 
             alt="Pikachu" 
             className="w-full h-full object-contain animate-pulse-neon"
+            style={{ backgroundColor: 'transparent' }}
           />
         </div>
 
