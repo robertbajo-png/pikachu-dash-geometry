@@ -21,7 +21,7 @@ const PLAYER_SIZE = 50;
 const SPIKE_WIDTH = 25;
 const SPIKE_HEIGHT = 30;
 const JUMP_HEIGHT = 120;
-const GAME_SPEED = 2;
+const GAME_SPEED = 2.5;
 
 export const PikachuGame = () => {
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameOver'>('menu');
@@ -214,7 +214,7 @@ export const PikachuGame = () => {
         </div>
       </div>
       
-      <Card className="relative overflow-hidden border-cyber bg-card/80" style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}>
+      <Card className="relative overflow-hidden border-cyber bg-transparent" style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}>
         {/* Ground */}
         <div 
           className="absolute bottom-0 w-full bg-neon-green/20 border-t border-neon-green"
