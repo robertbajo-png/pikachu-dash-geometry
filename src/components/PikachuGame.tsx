@@ -17,11 +17,11 @@ interface Spike extends GameObject {
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 400;
 const GROUND_HEIGHT = 50;
-const PLAYER_SIZE = 40;
-const SPIKE_WIDTH = 30;
-const SPIKE_HEIGHT = 40;
-const JUMP_HEIGHT = 100;
-const GAME_SPEED = 3;
+const PLAYER_SIZE = 50;
+const SPIKE_WIDTH = 25;
+const SPIKE_HEIGHT = 30;
+const JUMP_HEIGHT = 120;
+const GAME_SPEED = 2;
 
 export const PikachuGame = () => {
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameOver'>('menu');
@@ -69,7 +69,7 @@ export const PikachuGame = () => {
   const jump = useCallback(() => {
     if (!isJumping && gameState === 'playing') {
       setIsJumping(true);
-      setJumpVelocity(-15);
+      setJumpVelocity(-18);
     }
   }, [isJumping, gameState]);
 
@@ -93,7 +93,7 @@ export const PikachuGame = () => {
 
         if (isJumping) {
           newY += newJumpVelocity;
-          newJumpVelocity += 0.8; // gravity
+          newJumpVelocity += 0.7; // gravity
 
           if (newY >= groundY - PLAYER_SIZE) {
             newY = groundY - PLAYER_SIZE;
@@ -125,10 +125,10 @@ export const PikachuGame = () => {
         return newSpikes;
       });
 
-      // Add new spikes
+      // Add new spikes (less frequently)
       setSpikes(prevSpikes => {
         const lastSpike = prevSpikes[prevSpikes.length - 1];
-        if (!lastSpike || lastSpike.x < GAME_WIDTH - 200) {
+        if (!lastSpike || lastSpike.x < GAME_WIDTH - 350) {
           const newSpike: Spike = {
             id: spikeIdCounter.current++,
             x: GAME_WIDTH,
