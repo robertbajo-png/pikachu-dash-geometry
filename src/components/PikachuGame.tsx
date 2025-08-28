@@ -214,7 +214,7 @@ export const PikachuGame = () => {
         </div>
       </div>
       
-      <Card className="relative overflow-hidden border-cyber bg-transparent" style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}>
+      <div className="relative overflow-hidden" style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}>
         {/* Ground */}
         <div 
           className="absolute bottom-0 w-full bg-neon-green/20 border-t border-neon-green"
@@ -270,7 +270,7 @@ export const PikachuGame = () => {
             </div>
           </div>
         )}
-      </Card>
+      </div>
       
       <div className="mt-4 text-muted-foreground text-center">
         <div>Press SPACE or click anywhere to jump</div>
