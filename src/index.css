@@ -8,35 +8,52 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Gaming Electric Theme */
+    --background: 222 84% 8%;
+    --foreground: 184 100% 90%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 222 84% 12%;
+    --card-foreground: 184 100% 90%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 222 84% 12%;
+    --popover-foreground: 184 100% 90%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 120 100% 50%;
+    --primary-foreground: 222 84% 8%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 184 100% 50%;
+    --secondary-foreground: 222 84% 8%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 222 84% 15%;
+    --muted-foreground: 184 50% 70%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 300 100% 50%;
+    --accent-foreground: 222 84% 8%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 184 50% 30%;
+    --input: 222 84% 15%;
+    --ring: 120 100% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.25rem;
+    
+    /* Game specific colors */
+    --electric-blue: 222 84% 25%;
+    --neon-green: 120 100% 50%;
+    --neon-cyan: 184 100% 50%;
+    --neon-pink: 300 100% 50%;
+    --electric-grid: 222 50% 20%;
+    
+    /* Gradients */
+    --gradient-electric: linear-gradient(135deg, hsl(var(--electric-blue)), hsl(var(--background)));
+    --gradient-neon: linear-gradient(90deg, hsl(var(--neon-green)), hsl(var(--neon-cyan)));
+    
+    /* Shadows and glows */
+    --glow-green: 0 0 20px hsl(var(--neon-green) / 0.5);
+    --glow-cyan: 0 0 20px hsl(var(--neon-cyan) / 0.5);
+    --glow-pink: 0 0 20px hsl(var(--neon-pink) / 0.5);
 
     --sidebar-background: 0 0% 98%;
 
@@ -101,5 +118,53 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Courier New', monospace;
+  }
+}
+
+/* Game utility classes */
+@layer utilities {
+  .text-neon {
+    color: hsl(var(--neon-green));
+    text-shadow: var(--glow-green);
+  }
+  
+  .text-cyber {
+    color: hsl(var(--neon-cyan));
+    text-shadow: var(--glow-cyan);
+  }
+  
+  .border-neon {
+    border-color: hsl(var(--neon-green));
+    box-shadow: var(--glow-green);
+  }
+  
+  .border-cyber {
+    border-color: hsl(var(--neon-cyan));
+    box-shadow: var(--glow-cyan);
+  }
+  
+  .bg-electric {
+    background: var(--gradient-electric);
+  }
+  
+  .bg-grid {
+    background-image: 
+      linear-gradient(hsl(var(--electric-grid)) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--electric-grid)) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+  
+  .game-title {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 2rem;
+    color: hsl(var(--neon-green));
+    text-shadow: 
+      0 0 10px hsl(var(--neon-green)),
+      0 0 20px hsl(var(--neon-green)),
+      0 0 30px hsl(var(--neon-green));
+    text-transform: uppercase;
+    letter-spacing: 2px;
   }
 }
