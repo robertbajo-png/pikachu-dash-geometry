@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import gengarSprite from "@/assets/gengar-sprite.png";
 import charizardSprite from "@/assets/charizard-sprite.png";
+import { getTopScores, addHighScore, clearHighScores, type HighScore } from "@/lib/supabase";
 
 interface GameObject {
   x: number;
@@ -45,15 +46,13 @@ const CHARIZARD_SIZE = 50;
 export const PikachuGame = () => {
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'paused' | 'gameOver' | 'nameInput'>('menu');
   const [score, setScore] = useState(0);
-  const [topScores, setTopScores] = useState<{name: string, score: number}[]>(() => {
-    const saved = localStorage.getItem('pikachu-top-scores');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [topScores, setTopScores] = useState<HighScore[]>([]);
   const [playerName, setPlayerName] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [gameWidth, setGameWidth] = useState(() => getGameDimensions().width);
   const [gameHeight, setGameHeight] = useState(() => getGameDimensions().height);
   const [touchStart, setTouchStart] = useState<{x: number, y: number} | null>(null);
+  const [isLoadingScores, setIsLoadingScores] = useState(true);
   
   const [player, setPlayer] = useState<GameObject>({
     x: 100,
@@ -165,27 +164,36 @@ export const PikachuGame = () => {
     setGameState('playing');
   };
 
-  const resetHighScore = () => {
+  // Load high scores from Supabase on component mount
+  useEffect(() => {
+    const loadScores = async () => {
+      setIsLoadingScores(true);
+      const scores = await getTopScores();
+      setTopScores(scores);
+      setIsLoadingScores(false);
+    };
+    loadScores();
+  }, []);
+
+  const resetHighScore = async () => {
     setTopScores([]);
-    localStorage.setItem('pikachu-top-scores', '[]');
+    await clearHighScores();
   };
 
   const isTopScore = (currentScore: number) => {
     return topScores.length < 3 || currentScore > topScores[topScores.length - 1].score;
   };
 
-  const addTopScore = (name: string, score: number) => {
-    const newTopScores = [...topScores, { name: name.slice(0, 10).toUpperCase(), score }]
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 3);
-    
-    setTopScores(newTopScores);
-    localStorage.setItem('pikachu-top-scores', JSON.stringify(newTopScores));
+  const addTopScoreToSupabase = async (name: string, score: number) => {
+    await addHighScore(name.trim(), score);
+    // Refresh scores after adding
+    const updatedScores = await getTopScores();
+    setTopScores(updatedScores);
   };
 
-  const handleNameSubmit = () => {
+  const handleNameSubmit = async () => {
     if (playerName.trim()) {
-      addTopScore(playerName.trim(), score);
+      await addTopScoreToSupabase(playerName.trim(), score);
       setPlayerName('');
       setGameState('gameOver');
     }
@@ -529,8 +537,10 @@ export const PikachuGame = () => {
     <div className={`flex flex-col items-center justify-center min-h-screen ${isFlying ? 'bg-fire bg-fire-grid' : 'bg-electric bg-grid'}`}>
       {/* Top 3 High Scores - Responsive positioning */}
       <div className={`absolute top-4 right-4 bg-black/80 rounded-lg border-2 border-neon-cyan shadow-lg ${isMobile ? 'p-2 text-xs' : 'p-4'}`}>
-        <div className={`text-center text-cyber font-bold mb-2 ${isMobile ? 'text-sm' : 'text-lg mb-3'}`}>TOP 3</div>
-        {topScores.length > 0 ? (
+        <div className={`text-center text-cyber font-bold mb-2 ${isMobile ? 'text-sm' : 'text-lg mb-3'}`}>TOP 3 🏆</div>
+        {isLoadingScores ? (
+          <div className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>Loading...</div>
+        ) : topScores.length > 0 ? (
           topScores.map((entry, index) => (
             <div key={index} className={`flex justify-between items-center mb-1 ${isMobile ? 'text-xs min-w-[120px]' : 'text-sm mb-2 min-w-[150px]'}`}>
               <span className="text-neon-green font-bold">{index + 1}. {entry.name}</span>
