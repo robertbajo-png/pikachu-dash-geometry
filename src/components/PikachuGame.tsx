@@ -372,17 +372,17 @@ export const PikachuGame = () => {
   return (
     <div className={`flex flex-col items-center justify-center min-h-screen ${isFlying ? 'bg-fire bg-fire-grid' : 'bg-electric bg-grid'}`}>
       {/* Top 3 High Scores - Upper Right Corner */}
-      <div className="absolute top-4 right-4 bg-black/50 p-3 rounded border border-neon-cyan">
-        <div className="text-center text-cyber text-sm font-bold mb-2">TOP 3</div>
+      <div className="absolute top-4 right-4 bg-black/80 p-4 rounded-lg border-2 border-neon-cyan shadow-lg">
+        <div className="text-center text-cyber text-lg font-bold mb-3">TOP 3</div>
         {topScores.length > 0 ? (
           topScores.map((entry, index) => (
-            <div key={index} className="flex justify-between items-center text-xs mb-1">
-              <span className="text-neon-green">{index + 1}. {entry.name}</span>
-              <span className="text-cyber ml-2">{entry.score}</span>
+            <div key={index} className="flex justify-between items-center text-sm mb-2 min-w-[150px]">
+              <span className="text-neon-green font-bold">{index + 1}. {entry.name}</span>
+              <span className="text-cyber ml-3">{entry.score}</span>
             </div>
           ))
         ) : (
-          <div className="text-muted-foreground text-xs">No scores yet</div>
+          <div className="text-muted-foreground text-sm">No scores yet</div>
         )}
       </div>
 
