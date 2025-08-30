@@ -188,12 +188,21 @@ export const PikachuGame = () => {
   };
 
   const jump = useCallback(() => {
-    if (isGengar && gameState === 'playing') {
-      // In Gengar mode, clicking switches gravity
-      setGravityUp(prev => !prev);
-    } else if (!isJumping && gameState === 'playing' && !isFlying) {
-      setIsJumping(true);
-      setJumpVelocity(-15);
+    if (gameState === 'playing') {
+      if (isGengar) {
+        // In Gengar mode, clicking switches gravity
+        setGravityUp(prev => !prev);
+      } else if (isFlying) {
+        // In flying mode, allow gravity switching
+        setGravityUp(prev => !prev);
+      } else if (!isJumping) {
+        // Normal jump mode
+        setIsJumping(true);
+        setJumpVelocity(-15);
+      } else {
+        // Allow gravity switching while jumping
+        setJumpVelocity(prev => prev > 0 ? -15 : prev);
+      }
     }
   }, [isJumping, gameState, isFlying, isGengar]);
 
@@ -263,11 +272,11 @@ export const PikachuGame = () => {
           }
           setFlyingY(newY);
         } else if (isGengar) {
-          // Gengar mode - slowly moves between ground and ceiling with gravity switching
+          // Gengar mode - moves between ground and ceiling with gravity switching
           if (gravityUp) {
-            newY = Math.max(newY - 1, 50); // Move up slowly to ceiling
+            newY = Math.max(newY - 4, 50); // Move up faster to ceiling
           } else {
-            newY = Math.min(newY + 1, groundY - PLAYER_SIZE); // Move down slowly to ground
+            newY = Math.min(newY + 4, groundY - PLAYER_SIZE); // Move down faster to ground
           }
         } else if (isJumping) {
           newY += newJumpVelocity;
