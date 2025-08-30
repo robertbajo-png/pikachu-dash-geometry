@@ -72,6 +72,7 @@ export const PikachuGame = () => {
   const [flyingY, setFlyingY] = useState(0);
   const [isGengar, setIsGengar] = useState(false);
   const [gravityUp, setGravityUp] = useState(false);
+  const [modeChangedAt, setModeChangedAt] = useState<number | null>(null);
   
   const gameLoopRef = useRef<number>();
   const spikeIdCounter = useRef(0);
@@ -152,6 +153,7 @@ export const PikachuGame = () => {
     setFlyingY(0);
     setIsGengar(false);
     setGravityUp(false);
+    setModeChangedAt(null);
     spikeIdCounter.current = 0;
     flyingObstacleIdCounter.current = 0;
   }, [groundY]);
@@ -219,6 +221,7 @@ export const PikachuGame = () => {
   useEffect(() => {
     if (score >= FLYING_MODE_THRESHOLD && !isFlying && !isGengar) {
       setIsFlying(true);
+      setModeChangedAt(Date.now());
       setFlyingY(groundY - 150);
       setPlayer(prev => ({
         ...prev,
@@ -233,6 +236,7 @@ export const PikachuGame = () => {
   useEffect(() => {
     if (score >= GENGAR_MODE_THRESHOLD && !isGengar) {
       setIsGengar(true);
+      setModeChangedAt(Date.now());
       setIsFlying(false);
       setFlyingY(0);
       setPlayer(prev => ({
@@ -336,7 +340,11 @@ export const PikachuGame = () => {
       setSpikes(prevSpikes => {
         const lastSpike = prevSpikes[prevSpikes.length - 1];
         const spikeDistance = isFlying ? 200 : 350;
-        if (!lastSpike || lastSpike.x < gameWidth - spikeDistance) {
+        
+        // Check grace period after mode change (3 seconds)
+        const isInGracePeriod = modeChangedAt && (Date.now() - modeChangedAt) < 3000;
+        
+        if (!isInGracePeriod && (!lastSpike || lastSpike.x < gameWidth - spikeDistance)) {
           const spikes = [];
           
           // Ground spikes
@@ -368,7 +376,11 @@ export const PikachuGame = () => {
       setFlyingObstacles(prevObstacles => {
         const lastObstacle = prevObstacles[prevObstacles.length - 1];
         const obstacleDistance = isGengar ? 150 : (isFlying ? 250 : 400);
-        if (!lastObstacle || lastObstacle.x < gameWidth - obstacleDistance) {
+        
+        // Check grace period after mode change (3 seconds)
+        const isInGracePeriod = modeChangedAt && (Date.now() - modeChangedAt) < 3000;
+        
+        if (!isInGracePeriod && (!lastObstacle || lastObstacle.x < gameWidth - obstacleDistance)) {
           const obstacles = [];
           
           if (isGengar) {
