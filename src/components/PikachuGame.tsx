@@ -382,8 +382,8 @@ export const PikachuGame = () => {
                 id: flyingObstacleIdCounter.current++,
                 x: gameWidth + (i * 60),
                 y: randomHeight,
-                width: FLYING_OBSTACLE_SIZE,
-                height: FLYING_OBSTACLE_SIZE,
+                width: FLYING_OBSTACLE_SIZE - 8,
+                height: FLYING_OBSTACLE_SIZE - 8,
                 speed: currentSpeed + Math.random() * 2.5
               });
             }
