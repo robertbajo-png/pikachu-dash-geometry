@@ -49,6 +49,7 @@ export const PikachuGame = () => {
   const [isJumping, setIsJumping] = useState(false);
   const [jumpVelocity, setJumpVelocity] = useState(0);
   const [currentSpeed, setCurrentSpeed] = useState(GAME_SPEED);
+  const [keys, setKeys] = useState<{[key: string]: boolean}>({});
   
   const gameLoopRef = useRef<number>();
   const spikeIdCounter = useRef(0);
@@ -81,7 +82,7 @@ export const PikachuGame = () => {
   const jump = useCallback(() => {
     if (!isJumping && gameState === 'playing') {
       setIsJumping(true);
-      setJumpVelocity(-22);
+      setJumpVelocity(-15);
     }
   }, [isJumping, gameState]);
 
@@ -101,7 +102,16 @@ export const PikachuGame = () => {
     const gameLoop = () => {
       setPlayer(prevPlayer => {
         let newY = prevPlayer.y;
+        let newX = prevPlayer.x;
         let newJumpVelocity = jumpVelocity;
+
+        // Handle horizontal movement
+        if (keys['ArrowLeft'] || keys['KeyA']) {
+          newX = Math.max(0, newX - 6);
+        }
+        if (keys['ArrowRight'] || keys['KeyD']) {
+          newX = Math.min(GAME_WIDTH - PLAYER_SIZE, newX + 6);
+        }
 
         if (isJumping) {
           newY += newJumpVelocity;
@@ -116,7 +126,7 @@ export const PikachuGame = () => {
           }
         }
 
-        return { ...prevPlayer, y: newY };
+        return { ...prevPlayer, y: newY, x: newX };
       });
 
       // Move spikes and check collisions
@@ -206,29 +216,38 @@ export const PikachuGame = () => {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [gameState, isJumping, jumpVelocity, player, score, highScore, groundY, currentSpeed, flyingObstacles]);
+  }, [gameState, isJumping, jumpVelocity, player, score, highScore, groundY, currentSpeed, flyingObstacles, keys]);
 
   // Controls
   useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space' || e.code === 'ArrowUp') {
         e.preventDefault();
         jump();
       }
+      if (gameState === 'playing') {
+        setKeys(prev => ({ ...prev, [e.code]: true }));
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      setKeys(prev => ({ ...prev, [e.code]: false }));
     };
 
     const handleClick = () => {
       jump();
     };
 
-    window.addEventListener('keydown', handleKeyPress);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
     window.addEventListener('click', handleClick);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
       window.removeEventListener('click', handleClick);
     };
-  }, [jump]);
+  }, [jump, gameState]);
 
   if (gameState === 'menu') {
     return (
