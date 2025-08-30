@@ -43,7 +43,7 @@ const GENGAR_MODE_THRESHOLD = 5000;
 const CHARIZARD_SIZE = 50;
 
 export const PikachuGame = () => {
-  const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameOver' | 'nameInput'>('menu');
+  const [gameState, setGameState] = useState<'menu' | 'playing' | 'paused' | 'gameOver' | 'nameInput'>('menu');
   const [score, setScore] = useState(0);
   const [topScores, setTopScores] = useState<{name: string, score: number}[]>(() => {
     const saved = localStorage.getItem('pikachu-top-scores');
@@ -463,6 +463,16 @@ export const PikachuGame = () => {
   // Controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Escape') {
+        e.preventDefault();
+        if (gameState === 'playing') {
+          setGameState('paused');
+        } else if (gameState === 'paused') {
+          setGameState('playing');
+        }
+        return;
+      }
+      
       if (e.code === 'Space' || e.code === 'ArrowUp') {
         e.preventDefault();
         jump();
@@ -649,6 +659,22 @@ export const PikachuGame = () => {
               >
                 SAVE SCORE
               </Button>
+            </div>
+          </div>
+        )}
+
+        {gameState === 'paused' && (
+          <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+            <div className="text-center space-y-4">
+              <h2 className="text-neon text-3xl font-bold">PAUSED</h2>
+              <div className="text-cyber text-lg">Score: {score}</div>
+              <Button 
+                onClick={() => setGameState('playing')}
+                className="bg-neon-green text-black border-neon font-bold px-6 py-3 hover:bg-neon-green/80"
+              >
+                RESUME
+              </Button>
+              <div className="text-muted-foreground text-sm">Press ESC to resume</div>
             </div>
           </div>
         )}
