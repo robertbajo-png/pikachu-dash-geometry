@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import gengarSprite from "@/assets/gengar-sprite.png";
+import charizardSprite from "@/assets/charizard-sprite.png";
 
 interface GameObject {
   x: number;
@@ -28,6 +29,8 @@ const SPIKE_HEIGHT = 30;
 const JUMP_HEIGHT = 120;
 const GAME_SPEED = 2.5;
 const FLYING_OBSTACLE_SIZE = 35;
+const FLYING_MODE_THRESHOLD = 1000;
+const CHARIZARD_SIZE = 80;
 
 export const PikachuGame = () => {
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameOver'>('menu');
@@ -50,6 +53,8 @@ export const PikachuGame = () => {
   const [jumpVelocity, setJumpVelocity] = useState(0);
   const [currentSpeed, setCurrentSpeed] = useState(GAME_SPEED);
   const [keys, setKeys] = useState<{[key: string]: boolean}>({});
+  const [isFlying, setIsFlying] = useState(false);
+  const [flyingY, setFlyingY] = useState(0);
   
   const gameLoopRef = useRef<number>();
   const spikeIdCounter = useRef(0);
@@ -70,6 +75,8 @@ export const PikachuGame = () => {
     setIsJumping(false);
     setJumpVelocity(0);
     setCurrentSpeed(GAME_SPEED);
+    setIsFlying(false);
+    setFlyingY(0);
     spikeIdCounter.current = 0;
     flyingObstacleIdCounter.current = 0;
   }, [groundY]);
@@ -80,11 +87,11 @@ export const PikachuGame = () => {
   };
 
   const jump = useCallback(() => {
-    if (!isJumping && gameState === 'playing') {
+    if (!isJumping && gameState === 'playing' && !isFlying) {
       setIsJumping(true);
       setJumpVelocity(-15);
     }
-  }, [isJumping, gameState]);
+  }, [isJumping, gameState, isFlying]);
 
   const checkCollision = (rect1: GameObject, rect2: GameObject) => {
     return (
@@ -94,6 +101,20 @@ export const PikachuGame = () => {
       rect1.y + rect1.height > rect2.y
     );
   };
+
+  // Check if flying mode should be activated
+  useEffect(() => {
+    if (score >= FLYING_MODE_THRESHOLD && !isFlying) {
+      setIsFlying(true);
+      setFlyingY(groundY - 150);
+      setPlayer(prev => ({
+        ...prev,
+        y: groundY - 150,
+        width: CHARIZARD_SIZE,
+        height: CHARIZARD_SIZE
+      }));
+    }
+  }, [score, isFlying, groundY]);
 
   // Game loop
   useEffect(() => {
@@ -110,10 +131,19 @@ export const PikachuGame = () => {
           newX = Math.max(0, newX - 6);
         }
         if (keys['ArrowRight'] || keys['KeyD']) {
-          newX = Math.min(GAME_WIDTH - PLAYER_SIZE, newX + 6);
+          newX = Math.min(GAME_WIDTH - (isFlying ? CHARIZARD_SIZE : PLAYER_SIZE), newX + 6);
         }
 
-        if (isJumping) {
+        if (isFlying) {
+          // Flying mode controls
+          if (keys['ArrowUp'] || keys['KeyW']) {
+            newY = Math.max(50, newY - 4);
+          }
+          if (keys['ArrowDown'] || keys['KeyS']) {
+            newY = Math.min(groundY - CHARIZARD_SIZE, newY + 4);
+          }
+          setFlyingY(newY);
+        } else if (isJumping) {
           newY += newJumpVelocity;
           newJumpVelocity += 0.5; // gravity
 
@@ -165,37 +195,75 @@ export const PikachuGame = () => {
         return newObstacles;
       });
 
-      // Add new spikes
+      // Add new spikes (more frequent in flying mode)
       setSpikes(prevSpikes => {
         const lastSpike = prevSpikes[prevSpikes.length - 1];
-        if (!lastSpike || lastSpike.x < GAME_WIDTH - 350) {
-          const newSpike: Spike = {
+        const spikeDistance = isFlying ? 200 : 350;
+        if (!lastSpike || lastSpike.x < GAME_WIDTH - spikeDistance) {
+          const spikes = [];
+          
+          // Ground spikes
+          spikes.push({
             id: spikeIdCounter.current++,
             x: GAME_WIDTH,
             y: groundY - SPIKE_HEIGHT,
             width: SPIKE_WIDTH,
             height: SPIKE_HEIGHT
-          };
-          return [...prevSpikes, newSpike];
+          });
+          
+          // In flying mode, add ceiling spikes
+          if (isFlying && Math.random() < 0.6) {
+            spikes.push({
+              id: spikeIdCounter.current++,
+              x: GAME_WIDTH + (Math.random() * 100),
+              y: 0,
+              width: SPIKE_WIDTH,
+              height: SPIKE_HEIGHT * 2
+            });
+          }
+          
+          return [...prevSpikes, ...spikes];
         }
         return prevSpikes;
       });
 
-      // Add new flying obstacles
+      // Add new flying obstacles (more in flying mode)
       setFlyingObstacles(prevObstacles => {
         const lastObstacle = prevObstacles[prevObstacles.length - 1];
-        if (!lastObstacle || lastObstacle.x < GAME_WIDTH - 400) {
-          const heights = [groundY - 80, groundY - 120, groundY - 160];
-          const randomHeight = heights[Math.floor(Math.random() * heights.length)];
-          const newObstacle: FlyingObstacle = {
-            id: flyingObstacleIdCounter.current++,
-            x: GAME_WIDTH,
-            y: randomHeight,
-            width: FLYING_OBSTACLE_SIZE,
-            height: FLYING_OBSTACLE_SIZE,
-            speed: currentSpeed + Math.random() * 1.5
-          };
-          return [...prevObstacles, newObstacle];
+        const obstacleDistance = isFlying ? 250 : 400;
+        if (!lastObstacle || lastObstacle.x < GAME_WIDTH - obstacleDistance) {
+          const obstacles = [];
+          
+          if (isFlying) {
+            // Multiple height levels in flying mode
+            const heights = [50, 120, 200, groundY - 80, groundY - 120, groundY - 160];
+            const numObstacles = Math.random() < 0.7 ? 2 : 1;
+            
+            for (let i = 0; i < numObstacles; i++) {
+              const randomHeight = heights[Math.floor(Math.random() * heights.length)];
+              obstacles.push({
+                id: flyingObstacleIdCounter.current++,
+                x: GAME_WIDTH + (i * 80),
+                y: randomHeight,
+                width: FLYING_OBSTACLE_SIZE,
+                height: FLYING_OBSTACLE_SIZE,
+                speed: currentSpeed + Math.random() * 2
+              });
+            }
+          } else {
+            const heights = [groundY - 80, groundY - 120, groundY - 160];
+            const randomHeight = heights[Math.floor(Math.random() * heights.length)];
+            obstacles.push({
+              id: flyingObstacleIdCounter.current++,
+              x: GAME_WIDTH,
+              y: randomHeight,
+              width: FLYING_OBSTACLE_SIZE,
+              height: FLYING_OBSTACLE_SIZE,
+              speed: currentSpeed + Math.random() * 1.5
+            });
+          }
+          
+          return [...prevObstacles, ...obstacles];
         }
         return prevObstacles;
       });
@@ -216,7 +284,7 @@ export const PikachuGame = () => {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [gameState, isJumping, jumpVelocity, player, score, highScore, groundY, currentSpeed, flyingObstacles, keys]);
+  }, [gameState, isJumping, jumpVelocity, player, score, highScore, groundY, currentSpeed, flyingObstacles, keys, isFlying]);
 
   // Controls
   useEffect(() => {
@@ -278,6 +346,7 @@ export const PikachuGame = () => {
         <div className="text-cyber">
           <div className="text-2xl font-bold">{score}</div>
           <div className="text-sm">SCORE</div>
+          {isFlying && <div className="text-xs text-neon animate-pulse">FLYING MODE!</div>}
         </div>
         <div className="text-neon">
           <div className="text-2xl font-bold">{highScore}</div>
@@ -292,9 +361,9 @@ export const PikachuGame = () => {
           style={{ height: GROUND_HEIGHT }}
         />
         
-        {/* Player (Pikachu) */}
+        {/* Player (Pikachu or Charizard) */}
         <div
-          className={`absolute transition-none bg-transparent ${isJumping ? 'animate-float' : ''}`}
+          className={`absolute transition-none bg-transparent ${isJumping ? 'animate-float' : ''} ${isFlying ? 'animate-bounce' : ''}`}
           style={{
             left: player.x,
             bottom: GAME_HEIGHT - player.y - player.height,
@@ -302,11 +371,26 @@ export const PikachuGame = () => {
             height: player.height,
           }}
         >
-          <img 
-            src="/lovable-uploads/2c373f45-ab6b-45ba-a70a-8609e02d54cd.png"
-            alt="Pikachu" 
-            className="w-full h-full object-contain animate-pulse-neon bg-transparent"
-          />
+          {isFlying ? (
+            <div className="relative">
+              <img 
+                src={charizardSprite}
+                alt="Charizard" 
+                className="w-full h-full object-contain animate-pulse-neon bg-transparent"
+              />
+              <img 
+                src="/lovable-uploads/2c373f45-ab6b-45ba-a70a-8609e02d54cd.png"
+                alt="Pikachu" 
+                className="absolute top-2 left-1/2 transform -translate-x-1/2 w-6 h-6 object-contain"
+              />
+            </div>
+          ) : (
+            <img 
+              src="/lovable-uploads/2c373f45-ab6b-45ba-a70a-8609e02d54cd.png"
+              alt="Pikachu" 
+              className="w-full h-full object-contain animate-pulse-neon bg-transparent"
+            />
+          )}
         </div>
 
         {/* Spikes */}
@@ -319,7 +403,7 @@ export const PikachuGame = () => {
               bottom: GAME_HEIGHT - spike.y - spike.height,
               width: spike.width,
               height: spike.height,
-              clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+              clipPath: spike.y === 0 ? 'polygon(50% 100%, 0% 0%, 100% 0%)' : 'polygon(50% 0%, 0% 100%, 100% 100%)',
             }}
           />
         ))}
@@ -364,7 +448,12 @@ export const PikachuGame = () => {
       </div>
       
       <div className="mt-4 text-muted-foreground text-center">
-        <div>Press SPACE or click anywhere to jump</div>
+        <div>
+          {isFlying 
+            ? "Use ARROW KEYS or WASD to fly up/down/left/right" 
+            : "Press SPACE or click anywhere to jump"
+          }
+        </div>
       </div>
     </div>
   );
