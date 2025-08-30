@@ -39,7 +39,7 @@ const JUMP_HEIGHT = 120;
 const GAME_SPEED = 2.5;
 const FLYING_OBSTACLE_SIZE = 35;
 const FLYING_MODE_THRESHOLD = 1000;
-const CHARIZARD_SIZE = 80;
+const CHARIZARD_SIZE = 50;
 
 export const PikachuGame = () => {
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameOver' | 'nameInput'>('menu');
