@@ -97,7 +97,7 @@ export const PikachuGame = () => {
   };
 
   const addTopScore = (name: string, score: number) => {
-    const newTopScores = [...topScores, { name: name.slice(0, 3).toUpperCase(), score }]
+    const newTopScores = [...topScores, { name: name.slice(0, 10).toUpperCase(), score }]
       .sort((a, b) => b.score - a.score)
       .slice(0, 3);
     
@@ -473,15 +473,15 @@ export const PikachuGame = () => {
             <div className="text-center space-y-4 bg-card p-6 rounded border border-neon-cyan">
               <h2 className="text-neon text-2xl font-bold">TOP 3 SCORE!</h2>
               <div className="text-cyber text-lg">Score: {score}</div>
-              <div className="text-muted-foreground">Enter your name (max 3 letters):</div>
+              <div className="text-muted-foreground">Enter your name (max 10 letters):</div>
               <input
                 type="text"
                 value={playerName}
                 onChange={(e) => setPlayerName(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleNameSubmit()}
-                maxLength={3}
+                maxLength={10}
                 className="bg-input text-foreground px-3 py-2 rounded border border-border text-center uppercase"
-                placeholder="ABC"
+                placeholder="YOUR NAME"
                 autoFocus
               />
               <Button 
