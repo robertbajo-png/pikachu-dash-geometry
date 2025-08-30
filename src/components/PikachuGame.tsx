@@ -557,6 +557,16 @@ export const PikachuGame = () => {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
+        {/* Mobile Pause Button */}
+        {isMobile && (gameState === 'playing' || gameState === 'paused') && (
+          <Button
+            onClick={() => setGameState(gameState === 'playing' ? 'paused' : 'playing')}
+            className="absolute top-2 right-2 z-10 bg-neon/20 border border-neon text-cyber px-3 py-1 text-sm hover:bg-neon/30"
+          >
+            {gameState === 'playing' ? '⏸️' : '▶️'}
+          </Button>
+        )}
+        
         {/* Ground */}
         <div 
           className="absolute bottom-0 w-full bg-neon-green/20 border-t border-neon-green"
