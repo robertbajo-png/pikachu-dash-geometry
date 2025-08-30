@@ -80,7 +80,7 @@ export const PikachuGame = () => {
   const jump = useCallback(() => {
     if (!isJumping && gameState === 'playing') {
       setIsJumping(true);
-      setJumpVelocity(-18);
+      setJumpVelocity(-22);
     }
   }, [isJumping, gameState]);
 
@@ -104,7 +104,7 @@ export const PikachuGame = () => {
 
         if (isJumping) {
           newY += newJumpVelocity;
-          newJumpVelocity += 0.7; // gravity
+          newJumpVelocity += 0.5; // gravity
 
           if (newY >= groundY - PLAYER_SIZE) {
             newY = groundY - PLAYER_SIZE;
