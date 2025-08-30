@@ -237,9 +237,9 @@ export const PikachuGame = () => {
       setFlyingY(0);
       setPlayer(prev => ({
         ...prev,
-        y: groundY - PLAYER_SIZE,
-        width: PLAYER_SIZE,
-        height: PLAYER_SIZE
+        y: groundY - (PLAYER_SIZE - 14),
+        width: PLAYER_SIZE - 14,
+        height: PLAYER_SIZE - 14
       }));
     }
   }, [score, isGengar, groundY]);
@@ -259,7 +259,7 @@ export const PikachuGame = () => {
           newX = Math.max(0, newX - 6);
         }
         if (keys['ArrowRight'] || keys['KeyD']) {
-          newX = Math.min(gameWidth - (isFlying ? CHARIZARD_SIZE : PLAYER_SIZE), newX + 6);
+          newX = Math.min(gameWidth - (isFlying ? CHARIZARD_SIZE : isGengar ? PLAYER_SIZE - 14 : PLAYER_SIZE), newX + 6);
         }
 
         if (isFlying) {
@@ -276,7 +276,7 @@ export const PikachuGame = () => {
           if (gravityUp) {
             newY = Math.max(newY - 4, 50); // Move up faster to ceiling
           } else {
-            newY = Math.min(newY + 4, groundY - PLAYER_SIZE); // Move down faster to ground
+            newY = Math.min(newY + 4, groundY - (PLAYER_SIZE - 14)); // Move down faster to ground
           }
         } else if (isJumping) {
           newY += newJumpVelocity;
