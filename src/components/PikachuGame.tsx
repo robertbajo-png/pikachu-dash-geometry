@@ -341,8 +341,8 @@ export const PikachuGame = () => {
         const lastSpike = prevSpikes[prevSpikes.length - 1];
         const spikeDistance = isFlying ? 200 : 350;
         
-        // Check grace period after mode change (3 seconds)
-        const isInGracePeriod = modeChangedAt && (Date.now() - modeChangedAt) < 3000;
+        // Check grace period after mode change (2 seconds)
+        const isInGracePeriod = modeChangedAt && (Date.now() - modeChangedAt) < 2000;
         
         if (!isInGracePeriod && (!lastSpike || lastSpike.x < gameWidth - spikeDistance)) {
           const spikes = [];
@@ -377,8 +377,8 @@ export const PikachuGame = () => {
         const lastObstacle = prevObstacles[prevObstacles.length - 1];
         const obstacleDistance = isGengar ? 150 : (isFlying ? 250 : 400);
         
-        // Check grace period after mode change (3 seconds)
-        const isInGracePeriod = modeChangedAt && (Date.now() - modeChangedAt) < 3000;
+        // Check grace period after mode change (2 seconds)
+        const isInGracePeriod = modeChangedAt && (Date.now() - modeChangedAt) < 2000;
         
         if (!isInGracePeriod && (!lastObstacle || lastObstacle.x < gameWidth - obstacleDistance)) {
           const obstacles = [];
