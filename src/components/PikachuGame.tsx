@@ -370,7 +370,7 @@ export const PikachuGame = () => {
       setCurrentSpeed(prevSpeed => Math.min(prevSpeed + 0.001, 5));
 
       // Update score
-      setScore(prevScore => prevScore + 2000);
+      setScore(prevScore => prevScore + 1);
 
       gameLoopRef.current = requestAnimationFrame(gameLoop);
     };
