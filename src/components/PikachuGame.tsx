@@ -73,6 +73,7 @@ export const PikachuGame = () => {
   const [isGengar, setIsGengar] = useState(false);
   const [gravityUp, setGravityUp] = useState(false);
   const [flyingModeChangedAt, setFlyingModeChangedAt] = useState<number | null>(null);
+  const [gengarModeChangedAt, setGengarModeChangedAt] = useState<number | null>(null);
   
   const gameLoopRef = useRef<number>();
   const spikeIdCounter = useRef(0);
@@ -154,6 +155,7 @@ export const PikachuGame = () => {
     setIsGengar(false);
     setGravityUp(false);
     setFlyingModeChangedAt(null);
+    setGengarModeChangedAt(null);
     spikeIdCounter.current = 0;
     flyingObstacleIdCounter.current = 0;
   }, [groundY]);
@@ -236,6 +238,7 @@ export const PikachuGame = () => {
   useEffect(() => {
     if (score >= GENGAR_MODE_THRESHOLD && !isGengar) {
       setIsGengar(true);
+      setGengarModeChangedAt(Date.now());
       setIsFlying(false);
       setFlyingModeChangedAt(null); // Clear flying mode grace period
       setFlyingY(0);
@@ -341,10 +344,11 @@ export const PikachuGame = () => {
         const lastSpike = prevSpikes[prevSpikes.length - 1];
         const spikeDistance = isFlying ? 200 : 350;
         
-        // Check grace period after flying mode change (2 seconds) - no grace period for Gengar mode
+        // Check grace periods
         const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 2000 && isFlying;
+        const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 5000 && isGengar;
         
-        if (!isInFlyingGracePeriod && (!lastSpike || lastSpike.x < gameWidth - spikeDistance)) {
+        if (!isInFlyingGracePeriod && !isInGengarGracePeriod && (!lastSpike || lastSpike.x < gameWidth - spikeDistance)) {
           const spikes = [];
           
           // Ground spikes
@@ -377,10 +381,11 @@ export const PikachuGame = () => {
         const lastObstacle = prevObstacles[prevObstacles.length - 1];
         const obstacleDistance = isGengar ? 150 : (isFlying ? 250 : 400);
         
-        // Check grace period after flying mode change (2 seconds) - no grace period for Gengar mode
+        // Check grace periods
         const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 2000 && isFlying;
+        const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 5000 && isGengar;
         
-        if (!isInFlyingGracePeriod && (!lastObstacle || lastObstacle.x < gameWidth - obstacleDistance)) {
+        if (!isInFlyingGracePeriod && !isInGengarGracePeriod && (!lastObstacle || lastObstacle.x < gameWidth - obstacleDistance)) {
           const obstacles = [];
           
           if (isGengar) {
@@ -436,9 +441,10 @@ export const PikachuGame = () => {
       // Increase speed over time
       setCurrentSpeed(prevSpeed => Math.min(prevSpeed + 0.001, 5));
 
-      // Update score (pause during flying mode grace period only)
+      // Update score (pause during grace periods)
       const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 2000 && isFlying;
-      if (!isInFlyingGracePeriod) {
+      const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 5000 && isGengar;
+      if (!isInFlyingGracePeriod && !isInGengarGracePeriod) {
         setScore(prevScore => prevScore + 3);
       }
 
