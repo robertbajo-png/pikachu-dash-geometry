@@ -33,12 +33,13 @@ const FLYING_MODE_THRESHOLD = 1000;
 const CHARIZARD_SIZE = 80;
 
 export const PikachuGame = () => {
-  const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameOver'>('menu');
+  const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameOver' | 'nameInput'>('menu');
   const [score, setScore] = useState(0);
-  const [highScore, setHighScore] = useState(() => {
-    const saved = localStorage.getItem('pikachu-high-score');
-    return saved ? parseInt(saved) : 0;
+  const [topScores, setTopScores] = useState<{name: string, score: number}[]>(() => {
+    const saved = localStorage.getItem('pikachu-top-scores');
+    return saved ? JSON.parse(saved) : [];
   });
+  const [playerName, setPlayerName] = useState('');
   
   const [player, setPlayer] = useState<GameObject>({
     x: 100,
@@ -87,8 +88,29 @@ export const PikachuGame = () => {
   };
 
   const resetHighScore = () => {
-    setHighScore(0);
-    localStorage.setItem('pikachu-high-score', '0');
+    setTopScores([]);
+    localStorage.setItem('pikachu-top-scores', '[]');
+  };
+
+  const isTopScore = (currentScore: number) => {
+    return topScores.length < 3 || currentScore > topScores[topScores.length - 1].score;
+  };
+
+  const addTopScore = (name: string, score: number) => {
+    const newTopScores = [...topScores, { name: name.slice(0, 3).toUpperCase(), score }]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
+    
+    setTopScores(newTopScores);
+    localStorage.setItem('pikachu-top-scores', JSON.stringify(newTopScores));
+  };
+
+  const handleNameSubmit = () => {
+    if (playerName.trim()) {
+      addTopScore(playerName.trim(), score);
+      setPlayerName('');
+      setGameState('gameOver');
+    }
   };
 
   const jump = useCallback(() => {
@@ -173,10 +195,11 @@ export const PikachuGame = () => {
         // Check collisions with player
         const collision = newSpikes.some(spike => checkCollision(player, spike));
         if (collision) {
-          setGameState('gameOver');
-          const newHighScore = Math.max(score, highScore);
-          setHighScore(newHighScore);
-          localStorage.setItem('pikachu-high-score', newHighScore.toString());
+          if (isTopScore(score)) {
+            setGameState('nameInput');
+          } else {
+            setGameState('gameOver');
+          }
         }
 
         return newSpikes;
@@ -191,10 +214,11 @@ export const PikachuGame = () => {
         // Check collisions with player
         const collision = newObstacles.some(obstacle => checkCollision(player, obstacle));
         if (collision) {
-          setGameState('gameOver');
-          const newHighScore = Math.max(score, highScore);
-          setHighScore(newHighScore);
-          localStorage.setItem('pikachu-high-score', newHighScore.toString());
+          if (isTopScore(score)) {
+            setGameState('nameInput');
+          } else {
+            setGameState('gameOver');
+          }
         }
 
         return newObstacles;
@@ -289,7 +313,7 @@ export const PikachuGame = () => {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [gameState, isJumping, jumpVelocity, player, score, highScore, groundY, currentSpeed, flyingObstacles, keys, isFlying]);
+  }, [gameState, isJumping, jumpVelocity, player, score, groundY, currentSpeed, flyingObstacles, keys, isFlying]);
 
   // Controls
   useEffect(() => {
@@ -336,7 +360,6 @@ export const PikachuGame = () => {
               START GAME
             </Button>
             <div className="text-muted-foreground">
-              <div>High Score: {highScore}</div>
               <div className="text-sm mt-2">Press SPACE or click to jump</div>
               <div className="text-xs mt-1 text-fire">Reach 1000 for FLYING MODE!</div>
             </div>
@@ -348,15 +371,26 @@ export const PikachuGame = () => {
 
   return (
     <div className={`flex flex-col items-center justify-center min-h-screen ${isFlying ? 'bg-fire bg-fire-grid' : 'bg-electric bg-grid'}`}>
+      {/* Top 3 High Scores - Upper Right Corner */}
+      <div className="absolute top-4 right-4 bg-black/50 p-3 rounded border border-neon-cyan">
+        <div className="text-center text-cyber text-sm font-bold mb-2">TOP 3</div>
+        {topScores.length > 0 ? (
+          topScores.map((entry, index) => (
+            <div key={index} className="flex justify-between items-center text-xs mb-1">
+              <span className="text-neon-green">{index + 1}. {entry.name}</span>
+              <span className="text-cyber ml-2">{entry.score}</span>
+            </div>
+          ))
+        ) : (
+          <div className="text-muted-foreground text-xs">No scores yet</div>
+        )}
+      </div>
+
       <div className="mb-4 flex gap-8 text-center">
         <div className="text-cyber">
           <div className="text-2xl font-bold">{score}</div>
           <div className="text-sm">SCORE</div>
           {isFlying && <div className="text-xs text-neon animate-pulse">FLYING MODE!</div>}
-        </div>
-        <div className="text-neon">
-          <div className="text-2xl font-bold">{highScore}</div>
-          <div className="text-sm">HIGH SCORE</div>
         </div>
       </div>
       
@@ -434,14 +468,38 @@ export const PikachuGame = () => {
           </div>
         ))}
 
+        {gameState === 'nameInput' && (
+          <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
+            <div className="text-center space-y-4 bg-card p-6 rounded border border-neon-cyan">
+              <h2 className="text-neon text-2xl font-bold">TOP 3 SCORE!</h2>
+              <div className="text-cyber text-lg">Score: {score}</div>
+              <div className="text-muted-foreground">Enter your name (max 3 letters):</div>
+              <input
+                type="text"
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleNameSubmit()}
+                maxLength={3}
+                className="bg-input text-foreground px-3 py-2 rounded border border-border text-center uppercase"
+                placeholder="ABC"
+                autoFocus
+              />
+              <Button 
+                onClick={handleNameSubmit}
+                disabled={!playerName.trim()}
+                className="bg-neon-green text-black border-neon font-bold px-6 py-3 hover:bg-neon-green/80"
+              >
+                SAVE SCORE
+              </Button>
+            </div>
+          </div>
+        )}
+
         {gameState === 'gameOver' && (
           <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
             <div className="text-center space-y-4">
               <h2 className="text-destructive text-3xl font-bold">GAME OVER</h2>
               <div className="text-cyber text-xl">Final Score: {score}</div>
-              {score === highScore && (
-                <div className="text-neon animate-pulse-neon">NEW HIGH SCORE!</div>
-              )}
               <div className="flex gap-4 justify-center">
                 <Button 
                   onClick={startGame}
@@ -454,7 +512,7 @@ export const PikachuGame = () => {
                   variant="outline"
                   className="border-destructive text-destructive hover:bg-destructive hover:text-white px-4 py-3"
                 >
-                  RESET HIGH SCORE
+                  RESET SCORES
                 </Button>
               </div>
             </div>
