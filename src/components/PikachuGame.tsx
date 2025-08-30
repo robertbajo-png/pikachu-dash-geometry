@@ -20,6 +20,15 @@ interface FlyingObstacle extends GameObject {
   speed: number;
 }
 
+// Responsive game dimensions
+const getGameDimensions = () => {
+  const isMobile = window.innerWidth < 768;
+  return {
+    width: isMobile ? Math.min(window.innerWidth - 20, 400) : 800,
+    height: isMobile ? 300 : 400
+  };
+};
+
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 400;
 const GROUND_HEIGHT = 50;
@@ -40,6 +49,10 @@ export const PikachuGame = () => {
     return saved ? JSON.parse(saved) : [];
   });
   const [playerName, setPlayerName] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [gameWidth, setGameWidth] = useState(() => getGameDimensions().width);
+  const [gameHeight, setGameHeight] = useState(() => getGameDimensions().height);
+  const [touchStart, setTouchStart] = useState<{x: number, y: number} | null>(null);
   
   const [player, setPlayer] = useState<GameObject>({
     x: 100,
@@ -61,11 +74,67 @@ export const PikachuGame = () => {
   const spikeIdCounter = useRef(0);
   const flyingObstacleIdCounter = useRef(0);
   
-  const groundY = GAME_HEIGHT - GROUND_HEIGHT;
+  const groundY = gameHeight - GROUND_HEIGHT;
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const dimensions = getGameDimensions();
+      const newIsMobile = window.innerWidth < 768;
+      setIsMobile(newIsMobile);
+      setGameWidth(dimensions.width);
+      setGameHeight(dimensions.height);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Touch controls
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setTouchStart({ x: touch.clientX, y: touch.clientY });
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart) return;
+    
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStart.x;
+    const deltaY = touch.clientY - touchStart.y;
+    const minSwipeDistance = 30;
+
+    // Detect tap (short swipe distance)
+    if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+      jump();
+    } else if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      // Horizontal swipe
+      if (deltaX > minSwipeDistance) {
+        setKeys(prev => ({ ...prev, ArrowRight: true }));
+        setTimeout(() => setKeys(prev => ({ ...prev, ArrowRight: false })), 150);
+      } else if (deltaX < -minSwipeDistance) {
+        setKeys(prev => ({ ...prev, ArrowLeft: true }));
+        setTimeout(() => setKeys(prev => ({ ...prev, ArrowLeft: false })), 150);
+      }
+    } else {
+      // Vertical swipe (flying mode)
+      if (isFlying) {
+        if (deltaY < -minSwipeDistance) {
+          setKeys(prev => ({ ...prev, ArrowUp: true }));
+          setTimeout(() => setKeys(prev => ({ ...prev, ArrowUp: false })), 150);
+        } else if (deltaY > minSwipeDistance) {
+          setKeys(prev => ({ ...prev, ArrowDown: true }));
+          setTimeout(() => setKeys(prev => ({ ...prev, ArrowDown: false })), 150);
+        }
+      }
+    }
+    
+    setTouchStart(null);
+  };
 
   const resetGame = useCallback(() => {
     setPlayer({
-      x: 100,
+      x: 50,
       y: groundY - PLAYER_SIZE,
       width: PLAYER_SIZE,
       height: PLAYER_SIZE
@@ -158,7 +227,7 @@ export const PikachuGame = () => {
           newX = Math.max(0, newX - 6);
         }
         if (keys['ArrowRight'] || keys['KeyD']) {
-          newX = Math.min(GAME_WIDTH - (isFlying ? CHARIZARD_SIZE : PLAYER_SIZE), newX + 6);
+          newX = Math.min(gameWidth - (isFlying ? CHARIZARD_SIZE : PLAYER_SIZE), newX + 6);
         }
 
         if (isFlying) {
@@ -228,13 +297,13 @@ export const PikachuGame = () => {
       setSpikes(prevSpikes => {
         const lastSpike = prevSpikes[prevSpikes.length - 1];
         const spikeDistance = isFlying ? 200 : 350;
-        if (!lastSpike || lastSpike.x < GAME_WIDTH - spikeDistance) {
+        if (!lastSpike || lastSpike.x < gameWidth - spikeDistance) {
           const spikes = [];
           
           // Ground spikes
           spikes.push({
             id: spikeIdCounter.current++,
-            x: GAME_WIDTH,
+            x: gameWidth,
             y: groundY - SPIKE_HEIGHT,
             width: SPIKE_WIDTH,
             height: SPIKE_HEIGHT
@@ -244,7 +313,7 @@ export const PikachuGame = () => {
           if (isFlying && Math.random() < 0.6) {
             spikes.push({
               id: spikeIdCounter.current++,
-              x: GAME_WIDTH + (Math.random() * 100),
+              x: gameWidth + (Math.random() * 100),
               y: 0,
               width: SPIKE_WIDTH,
               height: SPIKE_HEIGHT * 2
@@ -260,7 +329,7 @@ export const PikachuGame = () => {
       setFlyingObstacles(prevObstacles => {
         const lastObstacle = prevObstacles[prevObstacles.length - 1];
         const obstacleDistance = isFlying ? 250 : 400;
-        if (!lastObstacle || lastObstacle.x < GAME_WIDTH - obstacleDistance) {
+        if (!lastObstacle || lastObstacle.x < gameWidth - obstacleDistance) {
           const obstacles = [];
           
           if (isFlying) {
@@ -272,7 +341,7 @@ export const PikachuGame = () => {
               const randomHeight = heights[Math.floor(Math.random() * heights.length)];
               obstacles.push({
                 id: flyingObstacleIdCounter.current++,
-                x: GAME_WIDTH + (i * 80),
+                x: gameWidth + (i * 80),
                 y: randomHeight,
                 width: FLYING_OBSTACLE_SIZE,
                 height: FLYING_OBSTACLE_SIZE,
@@ -284,7 +353,7 @@ export const PikachuGame = () => {
             const randomHeight = heights[Math.floor(Math.random() * heights.length)];
             obstacles.push({
               id: flyingObstacleIdCounter.current++,
-              x: GAME_WIDTH,
+              x: gameWidth,
               y: randomHeight,
               width: FLYING_OBSTACLE_SIZE,
               height: FLYING_OBSTACLE_SIZE,
@@ -371,18 +440,18 @@ export const PikachuGame = () => {
 
   return (
     <div className={`flex flex-col items-center justify-center min-h-screen ${isFlying ? 'bg-fire bg-fire-grid' : 'bg-electric bg-grid'}`}>
-      {/* Top 3 High Scores - Upper Right Corner */}
-      <div className="absolute top-4 right-4 bg-black/80 p-4 rounded-lg border-2 border-neon-cyan shadow-lg">
-        <div className="text-center text-cyber text-lg font-bold mb-3">TOP 3</div>
+      {/* Top 3 High Scores - Responsive positioning */}
+      <div className={`absolute top-4 right-4 bg-black/80 rounded-lg border-2 border-neon-cyan shadow-lg ${isMobile ? 'p-2 text-xs' : 'p-4'}`}>
+        <div className={`text-center text-cyber font-bold mb-2 ${isMobile ? 'text-sm' : 'text-lg mb-3'}`}>TOP 3</div>
         {topScores.length > 0 ? (
           topScores.map((entry, index) => (
-            <div key={index} className="flex justify-between items-center text-sm mb-2 min-w-[150px]">
+            <div key={index} className={`flex justify-between items-center mb-1 ${isMobile ? 'text-xs min-w-[120px]' : 'text-sm mb-2 min-w-[150px]'}`}>
               <span className="text-neon-green font-bold">{index + 1}. {entry.name}</span>
-              <span className="text-cyber ml-3">{entry.score}</span>
+              <span className={`text-cyber ${isMobile ? 'ml-2' : 'ml-3'}`}>{entry.score}</span>
             </div>
           ))
         ) : (
-          <div className="text-muted-foreground text-sm">No scores yet</div>
+          <div className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>No scores yet</div>
         )}
       </div>
 
@@ -394,7 +463,12 @@ export const PikachuGame = () => {
         </div>
       </div>
       
-      <div className="relative overflow-hidden" style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}>
+      <div 
+        className="relative overflow-hidden" 
+        style={{ width: gameWidth, height: gameHeight }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {/* Ground */}
         <div 
           className="absolute bottom-0 w-full bg-neon-green/20 border-t border-neon-green"
@@ -406,7 +480,7 @@ export const PikachuGame = () => {
           className={`absolute transition-none bg-transparent ${isJumping ? 'animate-float' : ''} ${isFlying ? 'animate-bounce' : ''}`}
           style={{
             left: player.x,
-            bottom: GAME_HEIGHT - player.y - player.height,
+            bottom: gameHeight - player.y - player.height,
             width: player.width,
             height: player.height,
           }}
@@ -440,7 +514,7 @@ export const PikachuGame = () => {
             className="absolute bg-destructive"
             style={{
               left: spike.x,
-              bottom: GAME_HEIGHT - spike.y - spike.height,
+              bottom: gameHeight - spike.y - spike.height,
               width: spike.width,
               height: spike.height,
               clipPath: spike.y === 0 ? 'polygon(50% 100%, 0% 0%, 100% 0%)' : 'polygon(50% 0%, 0% 100%, 100% 100%)',
@@ -455,7 +529,7 @@ export const PikachuGame = () => {
             className="absolute"
             style={{
               left: obstacle.x,
-              bottom: GAME_HEIGHT - obstacle.y - obstacle.height,
+              bottom: gameHeight - obstacle.y - obstacle.height,
               width: obstacle.width,
               height: obstacle.height,
             }}
@@ -522,12 +596,61 @@ export const PikachuGame = () => {
       
       <div className="mt-4 text-muted-foreground text-center">
         <div>
-          {isFlying 
-            ? "Use ARROW KEYS or WASD to fly up/down/left/right" 
-            : "Press SPACE or click anywhere to jump"
-          }
+          {isMobile ? (
+            isFlying ? "Tap the screen or use buttons to fly up/down/left/right" : "Tap the screen or use buttons to jump and move"
+          ) : (
+            isFlying ? "Use ARROW KEYS or WASD to fly up/down/left/right" : "Press SPACE or click anywhere to jump"
+          )}
         </div>
       </div>
+
+      {/* Mobile Control Buttons */}
+      {isMobile && gameState === 'playing' && (
+        <div className="mt-4 flex flex-col items-center gap-3">
+          {isFlying && (
+            <div className="flex gap-4">
+              <Button
+                onTouchStart={() => setKeys(prev => ({ ...prev, ArrowUp: true }))}
+                onTouchEnd={() => setKeys(prev => ({ ...prev, ArrowUp: false }))}
+                className="bg-neon/20 border border-neon text-cyber px-4 py-2 text-sm"
+              >
+                ↑
+              </Button>
+              <Button
+                onTouchStart={() => setKeys(prev => ({ ...prev, ArrowDown: true }))}
+                onTouchEnd={() => setKeys(prev => ({ ...prev, ArrowDown: false }))}
+                className="bg-neon/20 border border-neon text-cyber px-4 py-2 text-sm"
+              >
+                ↓
+              </Button>
+            </div>
+          )}
+          <div className="flex gap-4">
+            <Button
+              onTouchStart={() => setKeys(prev => ({ ...prev, ArrowLeft: true }))}
+              onTouchEnd={() => setKeys(prev => ({ ...prev, ArrowLeft: false }))}
+              className="bg-neon/20 border border-neon text-cyber px-4 py-2 text-sm"
+            >
+              ←
+            </Button>
+            {!isFlying && (
+              <Button
+                onTouchStart={jump}
+                className="bg-neon-green text-black border-neon font-bold px-6 py-2 text-sm"
+              >
+                JUMP
+              </Button>
+            )}
+            <Button
+              onTouchStart={() => setKeys(prev => ({ ...prev, ArrowRight: true }))}
+              onTouchEnd={() => setKeys(prev => ({ ...prev, ArrowRight: false }))}
+              className="bg-neon/20 border border-neon text-cyber px-4 py-2 text-sm"
+            >
+              →
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
