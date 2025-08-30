@@ -86,6 +86,11 @@ export const PikachuGame = () => {
     setGameState('playing');
   };
 
+  const resetHighScore = () => {
+    setHighScore(0);
+    localStorage.setItem('pikachu-high-score', '0');
+  };
+
   const jump = useCallback(() => {
     if (!isJumping && gameState === 'playing' && !isFlying) {
       setIsJumping(true);
@@ -104,9 +109,7 @@ export const PikachuGame = () => {
 
   // Check if flying mode should be activated
   useEffect(() => {
-    console.log('Score check:', score, 'Threshold:', FLYING_MODE_THRESHOLD, 'IsFlying:', isFlying);
     if (score >= FLYING_MODE_THRESHOLD && !isFlying) {
-      console.log('Activating flying mode!');
       setIsFlying(true);
       setFlyingY(groundY - 150);
       setPlayer(prev => ({
@@ -439,12 +442,21 @@ export const PikachuGame = () => {
               {score === highScore && (
                 <div className="text-neon animate-pulse-neon">NEW HIGH SCORE!</div>
               )}
-              <Button 
-                onClick={startGame}
-                className="bg-neon-green text-black border-neon font-bold px-6 py-3 hover:bg-neon-green/80"
-              >
-                PLAY AGAIN
-              </Button>
+              <div className="flex gap-4 justify-center">
+                <Button 
+                  onClick={startGame}
+                  className="bg-neon-green text-black border-neon font-bold px-6 py-3 hover:bg-neon-green/80"
+                >
+                  PLAY AGAIN
+                </Button>
+                <Button 
+                  onClick={resetHighScore}
+                  variant="outline"
+                  className="border-destructive text-destructive hover:bg-destructive hover:text-white px-4 py-3"
+                >
+                  RESET HIGH SCORE
+                </Button>
+              </div>
             </div>
           </div>
         )}
