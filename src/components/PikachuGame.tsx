@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import gengarSprite from "@/assets/gengar-sprite.png";
 
 interface GameObject {
   x: number;
@@ -308,15 +309,20 @@ export const PikachuGame = () => {
         {flyingObstacles.map(obstacle => (
           <div
             key={obstacle.id}
-            className="absolute bg-accent animate-pulse"
+            className="absolute"
             style={{
               left: obstacle.x,
               bottom: GAME_HEIGHT - obstacle.y - obstacle.height,
               width: obstacle.width,
               height: obstacle.height,
-              borderRadius: '50%',
             }}
-          />
+          >
+            <img 
+              src={gengarSprite}
+              alt="Gengar" 
+              className="w-full h-full object-contain animate-pulse bg-transparent"
+            />
+          </div>
         ))}
 
         {gameState === 'gameOver' && (
