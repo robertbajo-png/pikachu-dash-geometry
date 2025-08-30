@@ -333,6 +333,7 @@ export const PikachuGame = () => {
             <div className="text-muted-foreground">
               <div>High Score: {highScore}</div>
               <div className="text-sm mt-2">Press SPACE or click to jump</div>
+              <div className="text-xs mt-1 text-fire">Reach 1000 for FLYING MODE!</div>
             </div>
           </div>
         </div>
@@ -341,7 +342,7 @@ export const PikachuGame = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-electric bg-grid">
+    <div className={`flex flex-col items-center justify-center min-h-screen ${isFlying ? 'bg-fire bg-fire-grid' : 'bg-electric bg-grid'}`}>
       <div className="mb-4 flex gap-8 text-center">
         <div className="text-cyber">
           <div className="text-2xl font-bold">{score}</div>

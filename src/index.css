@@ -46,14 +46,24 @@ All colors MUST be HSL.
     --neon-pink: 300 100% 50%;
     --electric-grid: 222 50% 20%;
     
+    /* Fire colors */
+    --fire-red: 0 100% 40%;
+    --fire-orange: 15 100% 50%;
+    --fire-yellow: 45 100% 60%;
+    --lava-red: 0 100% 25%;
+    
     /* Gradients */
     --gradient-electric: linear-gradient(135deg, hsl(var(--electric-blue)), hsl(var(--background)));
     --gradient-neon: linear-gradient(90deg, hsl(var(--neon-green)), hsl(var(--neon-cyan)));
+    --gradient-fire: linear-gradient(135deg, hsl(var(--fire-red)), hsl(var(--fire-orange)), hsl(var(--fire-yellow)));
+    --gradient-lava: linear-gradient(180deg, hsl(var(--lava-red)), hsl(var(--fire-red)));
     
     /* Shadows and glows */
     --glow-green: 0 0 20px hsl(var(--neon-green) / 0.5);
     --glow-cyan: 0 0 20px hsl(var(--neon-cyan) / 0.5);
     --glow-pink: 0 0 20px hsl(var(--neon-pink) / 0.5);
+    --glow-fire: 0 0 25px hsl(var(--fire-orange) / 0.7);
+    --glow-lava: 0 0 30px hsl(var(--fire-red) / 0.6);
 
     --sidebar-background: 0 0% 98%;
 
@@ -148,11 +158,40 @@ All colors MUST be HSL.
     background: var(--gradient-electric);
   }
   
+  .bg-fire {
+    background: var(--gradient-fire);
+    animation: fire-flicker 2s ease-in-out infinite alternate;
+  }
+  
   .bg-grid {
     background-image: 
       linear-gradient(hsl(var(--electric-grid)) 1px, transparent 1px),
       linear-gradient(90deg, hsl(var(--electric-grid)) 1px, transparent 1px);
     background-size: 50px 50px;
+  }
+  
+  .bg-fire-grid {
+    background-image: 
+      linear-gradient(hsl(var(--fire-orange) / 0.3) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--fire-orange) / 0.3) 1px, transparent 1px);
+    background-size: 30px 30px;
+    animation: grid-pulse 3s ease-in-out infinite;
+  }
+  
+  .text-fire {
+    color: hsl(var(--fire-orange));
+    text-shadow: var(--glow-fire);
+  }
+  
+  @keyframes fire-flicker {
+    0% { filter: brightness(1) contrast(1); }
+    50% { filter: brightness(1.1) contrast(1.2); }
+    100% { filter: brightness(0.9) contrast(0.8); }
+  }
+  
+  @keyframes grid-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.8; }
   }
   
   .game-title {
