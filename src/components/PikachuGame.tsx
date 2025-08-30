@@ -104,7 +104,9 @@ export const PikachuGame = () => {
 
   // Check if flying mode should be activated
   useEffect(() => {
+    console.log('Score check:', score, 'Threshold:', FLYING_MODE_THRESHOLD, 'IsFlying:', isFlying);
     if (score >= FLYING_MODE_THRESHOLD && !isFlying) {
+      console.log('Activating flying mode!');
       setIsFlying(true);
       setFlyingY(groundY - 150);
       setPlayer(prev => ({
@@ -271,8 +273,8 @@ export const PikachuGame = () => {
       // Increase speed over time
       setCurrentSpeed(prevSpeed => Math.min(prevSpeed + 0.001, 5));
 
-      // Update score
-      setScore(prevScore => prevScore + 1);
+      // Update score (slower increment for testing)
+      setScore(prevScore => prevScore + 10);
 
       gameLoopRef.current = requestAnimationFrame(gameLoop);
     };
