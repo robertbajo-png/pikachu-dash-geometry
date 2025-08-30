@@ -364,14 +364,30 @@ export const PikachuGame = () => {
         return prevSpikes;
       });
 
-      // Add new flying obstacles (more in flying mode)
+      // Add new flying obstacles (more in flying mode and even more in Gengar mode)
       setFlyingObstacles(prevObstacles => {
         const lastObstacle = prevObstacles[prevObstacles.length - 1];
-        const obstacleDistance = isFlying ? 250 : 400;
+        const obstacleDistance = isGengar ? 150 : (isFlying ? 250 : 400);
         if (!lastObstacle || lastObstacle.x < gameWidth - obstacleDistance) {
           const obstacles = [];
           
-          if (isFlying) {
+          if (isGengar) {
+            // Gengar mode - many obstacles at different heights
+            const heights = [50, 100, 150, 200, 250, groundY - 80, groundY - 120, groundY - 160, groundY - 200];
+            const numObstacles = Math.random() < 0.8 ? 3 : 2;
+            
+            for (let i = 0; i < numObstacles; i++) {
+              const randomHeight = heights[Math.floor(Math.random() * heights.length)];
+              obstacles.push({
+                id: flyingObstacleIdCounter.current++,
+                x: gameWidth + (i * 60),
+                y: randomHeight,
+                width: FLYING_OBSTACLE_SIZE,
+                height: FLYING_OBSTACLE_SIZE,
+                speed: currentSpeed + Math.random() * 2.5
+              });
+            }
+          } else if (isFlying) {
             // Multiple height levels in flying mode
             const heights = [50, 120, 200, groundY - 80, groundY - 120, groundY - 160];
             const numObstacles = Math.random() < 0.7 ? 2 : 1;
