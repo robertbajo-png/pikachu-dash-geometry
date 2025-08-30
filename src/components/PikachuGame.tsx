@@ -436,8 +436,11 @@ export const PikachuGame = () => {
       // Increase speed over time
       setCurrentSpeed(prevSpeed => Math.min(prevSpeed + 0.001, 5));
 
-      // Update score
-      setScore(prevScore => prevScore + 3);
+      // Update score (pause during grace period)
+      const isInGracePeriod = modeChangedAt && (Date.now() - modeChangedAt) < 2000;
+      if (!isInGracePeriod) {
+        setScore(prevScore => prevScore + 3);
+      }
 
       gameLoopRef.current = requestAnimationFrame(gameLoop);
     };
