@@ -39,6 +39,7 @@ const JUMP_HEIGHT = 120;
 const GAME_SPEED = 2.5;
 const FLYING_OBSTACLE_SIZE = 35;
 const FLYING_MODE_THRESHOLD = 1000;
+const GENGAR_MODE_THRESHOLD = 5000;
 const CHARIZARD_SIZE = 50;
 
 export const PikachuGame = () => {
@@ -69,6 +70,8 @@ export const PikachuGame = () => {
   const [keys, setKeys] = useState<{[key: string]: boolean}>({});
   const [isFlying, setIsFlying] = useState(false);
   const [flyingY, setFlyingY] = useState(0);
+  const [isGengar, setIsGengar] = useState(false);
+  const [gravityUp, setGravityUp] = useState(false);
   
   const gameLoopRef = useRef<number>();
   const spikeIdCounter = useRef(0);
@@ -147,6 +150,8 @@ export const PikachuGame = () => {
     setCurrentSpeed(GAME_SPEED);
     setIsFlying(false);
     setFlyingY(0);
+    setIsGengar(false);
+    setGravityUp(false);
     spikeIdCounter.current = 0;
     flyingObstacleIdCounter.current = 0;
   }, [groundY]);
@@ -183,11 +188,14 @@ export const PikachuGame = () => {
   };
 
   const jump = useCallback(() => {
-    if (!isJumping && gameState === 'playing' && !isFlying) {
+    if (isGengar && gameState === 'playing') {
+      // In Gengar mode, clicking switches gravity
+      setGravityUp(prev => !prev);
+    } else if (!isJumping && gameState === 'playing' && !isFlying) {
       setIsJumping(true);
       setJumpVelocity(-15);
     }
-  }, [isJumping, gameState, isFlying]);
+  }, [isJumping, gameState, isFlying, isGengar]);
 
   const checkCollision = (rect1: GameObject, rect2: GameObject) => {
     return (
@@ -200,7 +208,7 @@ export const PikachuGame = () => {
 
   // Check if flying mode should be activated
   useEffect(() => {
-    if (score >= FLYING_MODE_THRESHOLD && !isFlying) {
+    if (score >= FLYING_MODE_THRESHOLD && !isFlying && !isGengar) {
       setIsFlying(true);
       setFlyingY(groundY - 150);
       setPlayer(prev => ({
@@ -210,7 +218,22 @@ export const PikachuGame = () => {
         height: CHARIZARD_SIZE
       }));
     }
-  }, [score, isFlying, groundY]);
+  }, [score, isFlying, groundY, isGengar]);
+
+  // Check if Gengar mode should be activated
+  useEffect(() => {
+    if (score >= GENGAR_MODE_THRESHOLD && !isGengar) {
+      setIsGengar(true);
+      setIsFlying(false);
+      setFlyingY(0);
+      setPlayer(prev => ({
+        ...prev,
+        y: groundY - PLAYER_SIZE,
+        width: PLAYER_SIZE,
+        height: PLAYER_SIZE
+      }));
+    }
+  }, [score, isGengar, groundY]);
 
   // Game loop
   useEffect(() => {
@@ -239,6 +262,13 @@ export const PikachuGame = () => {
             newY = Math.min(groundY - CHARIZARD_SIZE, newY + 4);
           }
           setFlyingY(newY);
+        } else if (isGengar) {
+          // Gengar mode - slowly moves between ground and ceiling with gravity switching
+          if (gravityUp) {
+            newY = Math.max(newY - 1, 50); // Move up slowly to ceiling
+          } else {
+            newY = Math.min(newY + 1, groundY - PLAYER_SIZE); // Move down slowly to ground
+          }
         } else if (isJumping) {
           newY += newJumpVelocity;
           newJumpVelocity += 0.5; // gravity
@@ -382,7 +412,7 @@ export const PikachuGame = () => {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [gameState, isJumping, jumpVelocity, player, score, groundY, currentSpeed, flyingObstacles, keys, isFlying]);
+  }, [gameState, isJumping, jumpVelocity, player, score, groundY, currentSpeed, flyingObstacles, keys, isFlying, isGengar, gravityUp]);
 
   // Controls
   useEffect(() => {
@@ -431,6 +461,7 @@ export const PikachuGame = () => {
             <div className="text-muted-foreground">
               <div className="text-sm mt-2">Press SPACE or click to jump</div>
               <div className="text-xs mt-1 text-fire">Reach 1000 for FLYING MODE!</div>
+              <div className="text-xs mt-1 text-destructive">Reach 5000 for GENGAR MODE!</div>
             </div>
           </div>
         </div>
@@ -460,6 +491,7 @@ export const PikachuGame = () => {
           <div className="text-2xl font-bold">{score}</div>
           <div className="text-sm">SCORE</div>
           {isFlying && <div className="text-xs text-neon animate-pulse">FLYING MODE!</div>}
+          {isGengar && <div className="text-xs text-destructive animate-pulse">GENGAR MODE!</div>}
         </div>
       </div>
       
@@ -498,6 +530,12 @@ export const PikachuGame = () => {
                 className="absolute top-2 left-1/2 transform -translate-x-1/2 w-6 h-6 object-contain"
               />
             </div>
+          ) : isGengar ? (
+            <img 
+              src={gengarSprite}
+              alt="Gengar" 
+              className="w-full h-full object-contain animate-pulse-neon bg-transparent"
+            />
           ) : (
             <img 
               src="/lovable-uploads/2c373f45-ab6b-45ba-a70a-8609e02d54cd.png"
@@ -597,9 +635,9 @@ export const PikachuGame = () => {
       <div className="mt-4 text-muted-foreground text-center">
         <div>
           {isMobile ? (
-            isFlying ? "Tap the screen or use buttons to fly up/down/left/right" : "Tap the screen or use buttons to jump and move"
+            isGengar ? "Tap the screen to switch gravity (Gengar floats up/down)" : (isFlying ? "Tap the screen or use buttons to fly up/down/left/right" : "Tap the screen or use buttons to jump and move")
           ) : (
-            isFlying ? "Use ARROW KEYS or WASD to fly up/down/left/right" : "Press SPACE or click anywhere to jump"
+            isGengar ? "Click anywhere or press SPACE to switch gravity (Gengar floats up/down)" : (isFlying ? "Use ARROW KEYS or WASD to fly up/down/left/right" : "Press SPACE or click anywhere to jump")
           )}
         </div>
       </div>
