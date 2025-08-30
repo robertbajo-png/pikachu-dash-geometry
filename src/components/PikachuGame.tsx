@@ -13,6 +13,11 @@ interface Spike extends GameObject {
   id: number;
 }
 
+interface FlyingObstacle extends GameObject {
+  id: number;
+  speed: number;
+}
+
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 400;
 const GROUND_HEIGHT = 50;
@@ -21,6 +26,7 @@ const SPIKE_WIDTH = 25;
 const SPIKE_HEIGHT = 30;
 const JUMP_HEIGHT = 120;
 const GAME_SPEED = 2.5;
+const FLYING_OBSTACLE_SIZE = 35;
 
 export const PikachuGame = () => {
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameOver'>('menu');
@@ -38,11 +44,14 @@ export const PikachuGame = () => {
   });
   
   const [spikes, setSpikes] = useState<Spike[]>([]);
+  const [flyingObstacles, setFlyingObstacles] = useState<FlyingObstacle[]>([]);
   const [isJumping, setIsJumping] = useState(false);
   const [jumpVelocity, setJumpVelocity] = useState(0);
+  const [currentSpeed, setCurrentSpeed] = useState(GAME_SPEED);
   
   const gameLoopRef = useRef<number>();
   const spikeIdCounter = useRef(0);
+  const flyingObstacleIdCounter = useRef(0);
   
   const groundY = GAME_HEIGHT - GROUND_HEIGHT;
 
@@ -54,10 +63,13 @@ export const PikachuGame = () => {
       height: PLAYER_SIZE
     });
     setSpikes([]);
+    setFlyingObstacles([]);
     setScore(0);
     setIsJumping(false);
     setJumpVelocity(0);
+    setCurrentSpeed(GAME_SPEED);
     spikeIdCounter.current = 0;
+    flyingObstacleIdCounter.current = 0;
   }, [groundY]);
 
   const startGame = () => {
@@ -109,7 +121,7 @@ export const PikachuGame = () => {
       // Move spikes and check collisions
       setSpikes(prevSpikes => {
         const newSpikes = prevSpikes
-          .map(spike => ({ ...spike, x: spike.x - GAME_SPEED }))
+          .map(spike => ({ ...spike, x: spike.x - currentSpeed }))
           .filter(spike => spike.x + spike.width > 0);
 
         // Check collisions with player
@@ -124,7 +136,25 @@ export const PikachuGame = () => {
         return newSpikes;
       });
 
-      // Add new spikes (less frequently)
+      // Move flying obstacles and check collisions
+      setFlyingObstacles(prevObstacles => {
+        const newObstacles = prevObstacles
+          .map(obstacle => ({ ...obstacle, x: obstacle.x - obstacle.speed }))
+          .filter(obstacle => obstacle.x + obstacle.width > 0);
+
+        // Check collisions with player
+        const collision = newObstacles.some(obstacle => checkCollision(player, obstacle));
+        if (collision) {
+          setGameState('gameOver');
+          const newHighScore = Math.max(score, highScore);
+          setHighScore(newHighScore);
+          localStorage.setItem('pikachu-high-score', newHighScore.toString());
+        }
+
+        return newObstacles;
+      });
+
+      // Add new spikes
       setSpikes(prevSpikes => {
         const lastSpike = prevSpikes[prevSpikes.length - 1];
         if (!lastSpike || lastSpike.x < GAME_WIDTH - 350) {
@@ -140,6 +170,28 @@ export const PikachuGame = () => {
         return prevSpikes;
       });
 
+      // Add new flying obstacles
+      setFlyingObstacles(prevObstacles => {
+        const lastObstacle = prevObstacles[prevObstacles.length - 1];
+        if (!lastObstacle || lastObstacle.x < GAME_WIDTH - 400) {
+          const heights = [groundY - 80, groundY - 120, groundY - 160];
+          const randomHeight = heights[Math.floor(Math.random() * heights.length)];
+          const newObstacle: FlyingObstacle = {
+            id: flyingObstacleIdCounter.current++,
+            x: GAME_WIDTH,
+            y: randomHeight,
+            width: FLYING_OBSTACLE_SIZE,
+            height: FLYING_OBSTACLE_SIZE,
+            speed: currentSpeed + Math.random() * 1.5
+          };
+          return [...prevObstacles, newObstacle];
+        }
+        return prevObstacles;
+      });
+
+      // Increase speed over time
+      setCurrentSpeed(prevSpeed => Math.min(prevSpeed + 0.001, 5));
+
       // Update score
       setScore(prevScore => prevScore + 1);
 
@@ -153,7 +205,7 @@ export const PikachuGame = () => {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [gameState, isJumping, jumpVelocity, player, score, highScore, groundY]);
+  }, [gameState, isJumping, jumpVelocity, player, score, highScore, groundY, currentSpeed, flyingObstacles]);
 
   // Controls
   useEffect(() => {
@@ -182,7 +234,7 @@ export const PikachuGame = () => {
       <div className="flex flex-col items-center justify-center min-h-screen bg-electric bg-grid">
         <div className="text-center space-y-8">
           <h1 className="game-title">PIKACHU DASH</h1>
-          <div className="text-cyber text-lg">Jump over the spikes!</div>
+          <div className="text-cyber text-lg">Avoid the spikes and flying obstacles!</div>
           <div className="space-y-4">
             <Button 
               onClick={startGame}
@@ -248,6 +300,21 @@ export const PikachuGame = () => {
               width: spike.width,
               height: spike.height,
               clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+            }}
+          />
+        ))}
+
+        {/* Flying Obstacles */}
+        {flyingObstacles.map(obstacle => (
+          <div
+            key={obstacle.id}
+            className="absolute bg-accent animate-pulse"
+            style={{
+              left: obstacle.x,
+              bottom: GAME_HEIGHT - obstacle.y - obstacle.height,
+              width: obstacle.width,
+              height: obstacle.height,
+              borderRadius: '50%',
             }}
           />
         ))}
