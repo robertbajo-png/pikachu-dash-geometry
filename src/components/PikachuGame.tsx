@@ -21,6 +21,11 @@ interface FlyingObstacle extends GameObject {
   speed: number;
 }
 
+interface PowerUp extends GameObject {
+  id: number;
+  type: 'shield';
+}
+
 // Responsive game dimensions
 const getGameDimensions = () => {
   const isMobile = window.innerWidth < 768;
@@ -42,6 +47,10 @@ const FLYING_OBSTACLE_SIZE = 35;
 const FLYING_MODE_THRESHOLD = 1000;
 const GENGAR_MODE_THRESHOLD = 5000;
 const CHARIZARD_SIZE = 50;
+const POWER_UP_SIZE = 32;
+const POWER_UP_DURATION = 5000;
+const POWER_UP_MIN_INTERVAL = 1200;
+const POWER_UP_MAX_INTERVAL = 2200;
 
 export const PikachuGame = () => {
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'paused' | 'gameOver' | 'nameInput'>('menu');
@@ -63,6 +72,7 @@ export const PikachuGame = () => {
   
   const [spikes, setSpikes] = useState<Spike[]>([]);
   const [flyingObstacles, setFlyingObstacles] = useState<FlyingObstacle[]>([]);
+  const [powerUps, setPowerUps] = useState<PowerUp[]>([]);
   const [isJumping, setIsJumping] = useState(false);
   const [jumpVelocity, setJumpVelocity] = useState(0);
   const [currentSpeed, setCurrentSpeed] = useState(GAME_SPEED);
@@ -73,10 +83,15 @@ export const PikachuGame = () => {
   const [gravityUp, setGravityUp] = useState(false);
   const [flyingModeChangedAt, setFlyingModeChangedAt] = useState<number | null>(null);
   const [gengarModeChangedAt, setGengarModeChangedAt] = useState<number | null>(null);
+  const [activePowerUp, setActivePowerUp] = useState<{ type: 'shield'; expiresAt: number } | null>(null);
+  const [isInvincible, setIsInvincible] = useState(false);
+  const [shieldTimeLeft, setShieldTimeLeft] = useState(0);
   
   const gameLoopRef = useRef<number>();
   const spikeIdCounter = useRef(0);
   const flyingObstacleIdCounter = useRef(0);
+  const powerUpIdCounter = useRef(0);
+  const nextPowerUpSpawn = useRef(0);
   
   const groundY = gameHeight - GROUND_HEIGHT;
 
@@ -145,6 +160,7 @@ export const PikachuGame = () => {
     });
     setSpikes([]);
     setFlyingObstacles([]);
+    setPowerUps([]);
     setScore(0);
     setIsJumping(false);
     setJumpVelocity(0);
@@ -157,6 +173,11 @@ export const PikachuGame = () => {
     setGengarModeChangedAt(null);
     spikeIdCounter.current = 0;
     flyingObstacleIdCounter.current = 0;
+    powerUpIdCounter.current = 0;
+    setActivePowerUp(null);
+    setIsInvincible(false);
+    const initialInterval = POWER_UP_MIN_INTERVAL + Math.random() * (POWER_UP_MAX_INTERVAL - POWER_UP_MIN_INTERVAL);
+    nextPowerUpSpawn.current = initialInterval;
   }, [groundY]);
 
   const startGame = () => {
@@ -218,6 +239,14 @@ export const PikachuGame = () => {
     }
   }, [isJumping, gameState, isFlying, isGengar]);
 
+  const activatePowerUp = useCallback(() => {
+    setActivePowerUp({ type: 'shield', expiresAt: Date.now() + POWER_UP_DURATION });
+    setIsInvincible(true);
+    setShieldTimeLeft(POWER_UP_DURATION);
+    setSpikes([]);
+    setFlyingObstacles([]);
+  }, []);
+
   const checkCollision = (rect1: GameObject, rect2: GameObject) => {
     return (
       rect1.x < rect2.x + rect2.width &&
@@ -264,6 +293,8 @@ export const PikachuGame = () => {
     if (gameState !== 'playing') return;
 
     const gameLoop = () => {
+      let updatedPlayer = player;
+
       setPlayer(prevPlayer => {
         let newY = prevPlayer.y;
         let newX = prevPlayer.x;
@@ -306,7 +337,9 @@ export const PikachuGame = () => {
           }
         }
 
-        return { ...prevPlayer, y: newY, x: newX };
+        const nextPlayer = { ...prevPlayer, y: newY, x: newX };
+        updatedPlayer = nextPlayer;
+        return nextPlayer;
       });
 
       // Move spikes and check collisions
@@ -316,7 +349,7 @@ export const PikachuGame = () => {
           .filter(spike => spike.x + spike.width > 0);
 
         // Check collisions with player
-        const collision = newSpikes.some(spike => checkCollision(player, spike));
+        const collision = !isInvincible && newSpikes.some(spike => checkCollision(updatedPlayer, spike));
         if (collision) {
           if (isTopScore(score)) {
             setGameState('nameInput');
@@ -335,7 +368,7 @@ export const PikachuGame = () => {
           .filter(obstacle => obstacle.x + obstacle.width > 0);
 
         // Check collisions with player
-        const collision = newObstacles.some(obstacle => checkCollision(player, obstacle));
+        const collision = !isInvincible && newObstacles.some(obstacle => checkCollision(updatedPlayer, obstacle));
         if (collision) {
           if (isTopScore(score)) {
             setGameState('nameInput');
@@ -446,6 +479,59 @@ export const PikachuGame = () => {
         return prevObstacles;
       });
 
+      setPowerUps(prevPowerUps => {
+        const movedPowerUps = prevPowerUps
+          .map(powerUp => ({ ...powerUp, x: powerUp.x - currentSpeed }))
+          .filter(powerUp => powerUp.x + powerUp.width > 0);
+
+        let collected = false;
+        const remaining = movedPowerUps.filter(powerUp => {
+          const collision = checkCollision(updatedPlayer, powerUp);
+          if (collision) {
+            collected = true;
+            return false;
+          }
+          return true;
+        });
+
+        if (collected) {
+          activatePowerUp();
+          const nextInterval = POWER_UP_MIN_INTERVAL + Math.random() * (POWER_UP_MAX_INTERVAL - POWER_UP_MIN_INTERVAL);
+          nextPowerUpSpawn.current = nextInterval;
+        }
+
+        return remaining;
+      });
+
+      if (!activePowerUp) {
+        nextPowerUpSpawn.current -= currentSpeed;
+      }
+
+      if (!activePowerUp && nextPowerUpSpawn.current <= 0) {
+        const spawnHeights: number[] = [];
+        if (isGengar) {
+          spawnHeights.push(groundY - POWER_UP_SIZE - 10, 80, 140, 200);
+        } else if (isFlying) {
+          spawnHeights.push(groundY - POWER_UP_SIZE - 10, 100, 160, flyingY);
+        } else {
+          spawnHeights.push(groundY - POWER_UP_SIZE - 10);
+        }
+
+        const spawnY = spawnHeights[Math.floor(Math.random() * spawnHeights.length)];
+        const newPowerUp: PowerUp = {
+          id: powerUpIdCounter.current++,
+          x: gameWidth,
+          y: spawnY,
+          width: POWER_UP_SIZE,
+          height: POWER_UP_SIZE,
+          type: 'shield'
+        };
+
+        setPowerUps(prev => [...prev, newPowerUp]);
+        const nextInterval = POWER_UP_MIN_INTERVAL + Math.random() * (POWER_UP_MAX_INTERVAL - POWER_UP_MIN_INTERVAL);
+        nextPowerUpSpawn.current = nextInterval;
+      }
+
       // Increase speed over time
       setCurrentSpeed(prevSpeed => Math.min(prevSpeed + 0.001, 5));
 
@@ -466,7 +552,37 @@ export const PikachuGame = () => {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [gameState, isJumping, jumpVelocity, player, score, groundY, currentSpeed, flyingObstacles, keys, isFlying, isGengar, gravityUp]);
+  }, [gameState, isJumping, jumpVelocity, player, score, groundY, currentSpeed, flyingObstacles, keys, isFlying, isGengar, gravityUp, isInvincible, activePowerUp, activatePowerUp, flyingY, gameWidth]);
+
+  useEffect(() => {
+    if (!activePowerUp) {
+      setIsInvincible(false);
+      setShieldTimeLeft(0);
+      return;
+    }
+
+    setIsInvincible(true);
+
+    const updateShieldTime = () => {
+      setShieldTimeLeft(Math.max(activePowerUp.expiresAt - Date.now(), 0));
+    };
+
+    updateShieldTime();
+
+    const interval = window.setInterval(updateShieldTime, 100);
+    const timeout = window.setTimeout(() => {
+      setActivePowerUp(null);
+      setIsInvincible(false);
+      setShieldTimeLeft(0);
+    }, Math.max(activePowerUp.expiresAt - Date.now(), 0));
+
+    return () => {
+      window.clearInterval(interval);
+      window.clearTimeout(timeout);
+    };
+  }, [activePowerUp]);
+
+  const shieldSecondsRemaining = Math.max(Math.ceil(shieldTimeLeft / 1000), 0);
 
   // Controls
   useEffect(() => {
@@ -558,6 +674,11 @@ export const PikachuGame = () => {
           <div className="text-sm">SCORE</div>
           {isFlying && <div className="text-xs text-neon animate-pulse">FLYING MODE!</div>}
           {isGengar && <div className="text-xs text-destructive animate-pulse">GENGAR MODE!</div>}
+          {activePowerUp && (
+            <div className="text-xs text-neon-cyan animate-pulse">
+              SHIELD ACTIVE{shieldSecondsRemaining > 0 ? ` (${shieldSecondsRemaining}s)` : ''}
+            </div>
+          )}
         </div>
       </div>
       
@@ -593,32 +714,40 @@ export const PikachuGame = () => {
             height: player.height,
           }}
         >
-          {isFlying ? (
-            <div className="relative">
-              <img 
-                src={charizardSprite}
-                alt="Charizard" 
+          <div className="relative w-full h-full flex items-center justify-center">
+            {activePowerUp && (
+              <>
+                <div className="absolute inset-[-10px] rounded-full border-2 border-neon-cyan/60 animate-pulse" />
+                <div className="absolute inset-[-18px] rounded-full border border-neon-cyan/30 animate-ping" />
+              </>
+            )}
+            {isFlying ? (
+              <div className="relative">
+                <img
+                  src={charizardSprite}
+                  alt="Charizard"
+                  className="w-full h-full object-contain animate-pulse-neon bg-transparent"
+                />
+                <img
+                  src="/lovable-uploads/2c373f45-ab6b-45ba-a70a-8609e02d54cd.png"
+                  alt="Pikachu"
+                  className="absolute top-2 left-1/2 transform -translate-x-1/2 w-6 h-6 object-contain"
+                />
+              </div>
+            ) : isGengar ? (
+              <img
+                src={gengarSprite}
+                alt="Gengar"
                 className="w-full h-full object-contain animate-pulse-neon bg-transparent"
               />
-              <img 
+            ) : (
+              <img
                 src="/lovable-uploads/2c373f45-ab6b-45ba-a70a-8609e02d54cd.png"
-                alt="Pikachu" 
-                className="absolute top-2 left-1/2 transform -translate-x-1/2 w-6 h-6 object-contain"
+                alt="Pikachu"
+                className="w-full h-full object-contain animate-pulse-neon bg-transparent"
               />
-            </div>
-          ) : isGengar ? (
-            <img 
-              src={gengarSprite}
-              alt="Gengar" 
-              className="w-full h-full object-contain animate-pulse-neon bg-transparent"
-            />
-          ) : (
-            <img 
-              src="/lovable-uploads/2c373f45-ab6b-45ba-a70a-8609e02d54cd.png"
-              alt="Pikachu" 
-              className="w-full h-full object-contain animate-pulse-neon bg-transparent"
-            />
-          )}
+            )}
+          </div>
         </div>
 
         {/* Spikes */}
@@ -648,11 +777,27 @@ export const PikachuGame = () => {
               height: obstacle.height,
             }}
           >
-            <img 
+            <img
               src={gengarSprite}
-              alt="Gengar" 
+              alt="Gengar"
               className="w-full h-full object-contain animate-pulse bg-transparent"
             />
+          </div>
+        ))}
+
+        {/* Power Ups */}
+        {powerUps.map(powerUp => (
+          <div
+            key={powerUp.id}
+            className="absolute flex items-center justify-center rounded-full border-2 border-neon-cyan bg-neon-cyan/20 shadow-lg"
+            style={{
+              left: powerUp.x,
+              bottom: gameHeight - powerUp.y - powerUp.height,
+              width: powerUp.width,
+              height: powerUp.height,
+            }}
+          >
+            <span className="text-neon-cyan text-lg font-black">⚡</span>
           </div>
         ))}
 
@@ -727,10 +872,17 @@ export const PikachuGame = () => {
       <div className="mt-4 text-muted-foreground text-center">
         <div>
           {isMobile ? (
-            isGengar ? "Tap the screen to switch gravity (Gengar floats up/down)" : (isFlying ? "Tap the screen or use buttons to fly up/down/left/right" : "Tap the screen or use buttons to jump and move")
+            isGengar ? "Tap the screen to switch gravity (Gengar floats up/down)" : (
+              isFlying ? "Tap the screen or use buttons to fly up/down/left/right" : "Tap the screen or use buttons to jump and move"
+            )
           ) : (
-            isGengar ? "Click anywhere or press SPACE to switch gravity (Gengar floats up/down)" : (isFlying ? "Use ARROW KEYS or WASD to fly up/down/left/right" : "Press SPACE or click anywhere to jump")
+            isGengar ? "Click anywhere or press SPACE to switch gravity (Gengar floats up/down)" : (
+              isFlying ? "Use ARROW KEYS or WASD to fly up/down/left/right" : "Press SPACE or click anywhere to jump"
+            )
           )}
+        </div>
+        <div className="text-xs text-neon-cyan mt-2">
+          Collect ⚡ orbs to activate a temporary shield that clears obstacles! Shield uptime is shown while it is active.
         </div>
       </div>
 
