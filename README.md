@@ -57,6 +57,11 @@ development server:
    scripts. Run `npm run run -- --help` (or `npm run run --help` in newer npm
    releases) at any time to see the available modes
    and the optional `RUN_GAME_HOST` environment toggle.
+   You can also pin the dev port or enforce exclusivity without the separator.
+   For example, `npm run run --port 5173` and `npm run run --strictPort` are
+   forwarded directly to Vite, and the explicit script variant
+   `npm run dev -- --strictPort --port 5173` still works if you prefer to call
+   the underlying command yourself.
    Both dev flavours keep their logs visible by default (`--clearScreen false`).
    If you prefer the old behaviour, append `-- --clearScreen true` to the
    command you launch.
