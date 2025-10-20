@@ -36,6 +36,47 @@ npm i
 npm run dev
 ```
 
+## How do I test the Pikachu Dash game locally?
+
+Once the dependencies are installed, you can playtest the game locally with the
+development server:
+
+1. Start the dev server (if it is not already running). You can still launch it
+   directly, or use the convenience runner that chooses the right mode for you:
+   ```bash
+   # shorthand helper that defaults to the local dev server
+   npm run run
+   # force the hosted variant (equivalent to npm run dev:host)
+   npm run run --host
+   # ...or, if you prefer the explicit npm argument separator
+   npm run run -- --host
+   ```
+   The helper also understands `--build` and `--preview` flags if you want to
+   chain into a production-style test without memorising the underlying npm
+   scripts. Run `npm run run -- --help` (or `npm run run --help` in newer npm
+   releases) at any time to see the available modes
+   and the optional `RUN_GAME_HOST` environment toggle.
+   You can also pin the dev port or enforce exclusivity without the separator.
+   For example, `npm run run --port 5173` and `npm run run --strictPort` are
+   forwarded directly to Vite, and the explicit script variant
+   `npm run dev -- --strictPort --port 5173` still works if you prefer to call
+   the underlying command yourself.
+   Both dev flavours keep their logs visible by default (`--clearScreen false`).
+   If you prefer the old behaviour, append `-- --clearScreen true` to the
+   command you launch.
+2. By default, the banner shows the localhost URL
+   (for example, `Local:   http://localhost:5173`). If you need to share the
+   session across your LAN, run the hosted variant (`npm run run --host`,
+   `npm run dev:host`, or `VITE_HOST=0.0.0.0 npm run dev`) so Vite advertises
+   both the local and network addresses. Use whichever address matches your
+   playtesting setup.
+3. The page hot-reloads automatically as you tweak code, so you can iterate on
+   mechanics like the shield power-up in real time.
+
+If you want to test a production build instead, run `npm run run -- --build`
+followed by `npm run run -- --preview` and open the preview URL that Vite prints
+in the terminal.
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
