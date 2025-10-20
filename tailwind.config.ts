@@ -1,5 +1,9 @@
 import type { Config } from "tailwindcss";
+ codex/continue-coding-pikachu-dash
 import tailwindcssAnimate from "tailwindcss-animate";
+=======
+import animatePlugin from "tailwindcss-animate";
+ main
 
 export default {
 	darkMode: ["class"],
@@ -116,5 +120,9 @@ export default {
 			}
 		}
 	},
+ codex/continue-coding-pikachu-dash
         plugins: [tailwindcssAnimate],
+=======
+        plugins: [animatePlugin],
+ main
 } satisfies Config;
