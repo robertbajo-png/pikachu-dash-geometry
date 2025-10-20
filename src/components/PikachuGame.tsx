@@ -37,10 +37,10 @@ const PLAYER_SIZE = 50;
 const SPIKE_WIDTH = 25;
 const SPIKE_HEIGHT = 30;
 const JUMP_HEIGHT = 120;
-const GAME_SPEED = 2.5;
+const GAME_SPEED = 2.2;
 const FLYING_OBSTACLE_SIZE = 35;
-const FLYING_MODE_THRESHOLD = 1000;
-const GENGAR_MODE_THRESHOLD = 5000;
+const FLYING_MODE_THRESHOLD = 1500;
+const GENGAR_MODE_THRESHOLD = 6000;
 const CHARIZARD_SIZE = 50;
 
 export const PikachuGame = () => {
@@ -102,43 +102,30 @@ export const PikachuGame = () => {
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (!touchStart) return;
-    
+
     const touch = e.changedTouches[0];
-    const deltaX = touch.clientX - touchStart.x;
     const deltaY = touch.clientY - touchStart.y;
     const minSwipeDistance = 30;
 
     // Detect tap (short swipe distance)
-    if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+    if (Math.abs(deltaY) < minSwipeDistance) {
       jump();
-    } else if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      // Horizontal swipe
-      if (deltaX > minSwipeDistance) {
-        setKeys(prev => ({ ...prev, ArrowRight: true }));
-        setTimeout(() => setKeys(prev => ({ ...prev, ArrowRight: false })), 150);
-      } else if (deltaX < -minSwipeDistance) {
-        setKeys(prev => ({ ...prev, ArrowLeft: true }));
-        setTimeout(() => setKeys(prev => ({ ...prev, ArrowLeft: false })), 150);
-      }
-    } else {
-      // Vertical swipe (flying mode)
-      if (isFlying) {
-        if (deltaY < -minSwipeDistance) {
-          setKeys(prev => ({ ...prev, ArrowUp: true }));
-          setTimeout(() => setKeys(prev => ({ ...prev, ArrowUp: false })), 150);
-        } else if (deltaY > minSwipeDistance) {
-          setKeys(prev => ({ ...prev, ArrowDown: true }));
-          setTimeout(() => setKeys(prev => ({ ...prev, ArrowDown: false })), 150);
-        }
+    } else if (isFlying) {
+      if (deltaY < -minSwipeDistance) {
+        setKeys(prev => ({ ...prev, ArrowUp: true }));
+        setTimeout(() => setKeys(prev => ({ ...prev, ArrowUp: false })), 150);
+      } else if (deltaY > minSwipeDistance) {
+        setKeys(prev => ({ ...prev, ArrowDown: true }));
+        setTimeout(() => setKeys(prev => ({ ...prev, ArrowDown: false })), 150);
       }
     }
-    
+
     setTouchStart(null);
   };
 
   const resetGame = useCallback(() => {
     setPlayer({
-      x: 50,
+      x: 80,
       y: groundY - PLAYER_SIZE,
       width: PLAYER_SIZE,
       height: PLAYER_SIZE
@@ -180,9 +167,9 @@ export const PikachuGame = () => {
     await clearHighScores();
   };
 
-  const isTopScore = (currentScore: number) => {
+  const isTopScore = useCallback((currentScore: number) => {
     return topScores.length < 3 || currentScore > topScores[topScores.length - 1].score;
-  };
+  }, [topScores]);
 
   const addTopScoreToSupabase = async (name: string, score: number) => {
     await addHighScore(name.trim(), score);
@@ -266,16 +253,10 @@ export const PikachuGame = () => {
     const gameLoop = () => {
       setPlayer(prevPlayer => {
         let newY = prevPlayer.y;
-        let newX = prevPlayer.x;
+        const maxX = gameWidth - (isFlying ? CHARIZARD_SIZE : isGengar ? PLAYER_SIZE - 14 : PLAYER_SIZE);
+        const targetX = isFlying ? 120 : isGengar ? 90 : 80;
+        const newX = Math.min(Math.max(40, targetX), Math.max(40, maxX));
         let newJumpVelocity = jumpVelocity;
-
-        // Handle horizontal movement
-        if (keys['ArrowLeft'] || keys['KeyA']) {
-          newX = Math.max(0, newX - 6);
-        }
-        if (keys['ArrowRight'] || keys['KeyD']) {
-          newX = Math.min(gameWidth - (isFlying ? CHARIZARD_SIZE : isGengar ? PLAYER_SIZE - 14 : PLAYER_SIZE), newX + 6);
-        }
 
         if (isFlying) {
           // Flying mode controls
@@ -350,11 +331,11 @@ export const PikachuGame = () => {
       // Add new spikes (more frequent in flying mode)
       setSpikes(prevSpikes => {
         const lastSpike = prevSpikes[prevSpikes.length - 1];
-        const spikeDistance = isFlying ? 200 : 350;
+        const spikeDistance = isFlying ? 320 : 480;
         
         // Check grace periods
-        const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 2000 && isFlying;
-        const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 5000 && isGengar;
+        const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 3000 && isFlying;
+        const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 6000 && isGengar;
         
         if (!isInFlyingGracePeriod && !isInGengarGracePeriod && (!lastSpike || lastSpike.x < gameWidth - spikeDistance)) {
           const spikes = [];
@@ -369,7 +350,7 @@ export const PikachuGame = () => {
           });
           
           // In flying mode, add ceiling spikes
-          if (isFlying && Math.random() < 0.6) {
+          if (isFlying && Math.random() < 0.45) {
             spikes.push({
               id: spikeIdCounter.current++,
               x: gameWidth + (Math.random() * 100),
@@ -387,19 +368,19 @@ export const PikachuGame = () => {
       // Add new flying obstacles (more in flying mode and even more in Gengar mode)
       setFlyingObstacles(prevObstacles => {
         const lastObstacle = prevObstacles[prevObstacles.length - 1];
-        const obstacleDistance = isGengar ? 150 : (isFlying ? 250 : 400);
+        const obstacleDistance = isGengar ? 240 : (isFlying ? 360 : 520);
         
         // Check grace periods
-        const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 2000 && isFlying;
-        const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 5000 && isGengar;
+        const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 3000 && isFlying;
+        const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 6000 && isGengar;
         
         if (!isInFlyingGracePeriod && !isInGengarGracePeriod && (!lastObstacle || lastObstacle.x < gameWidth - obstacleDistance)) {
           const obstacles = [];
           
           if (isGengar) {
             // Gengar mode - many obstacles at different heights
-            const heights = [50, 100, 150, 200, 250, groundY - 80, groundY - 120, groundY - 160, groundY - 200];
-            const numObstacles = Math.random() < 0.8 ? 3 : 2;
+            const heights = [80, 140, 200, 260, groundY - 80, groundY - 140];
+            const numObstacles = Math.random() < 0.6 ? 2 : 1;
             
             for (let i = 0; i < numObstacles; i++) {
               const randomHeight = heights[Math.floor(Math.random() * heights.length)];
@@ -414,8 +395,8 @@ export const PikachuGame = () => {
             }
           } else if (isFlying) {
             // Multiple height levels in flying mode
-            const heights = [50, 120, 200, groundY - 80, groundY - 120, groundY - 160];
-            const numObstacles = Math.random() < 0.7 ? 2 : 1;
+            const heights = [80, 160, groundY - 100, groundY - 150];
+            const numObstacles = Math.random() < 0.5 ? 2 : 1;
             
             for (let i = 0; i < numObstacles; i++) {
               const randomHeight = heights[Math.floor(Math.random() * heights.length)];
@@ -447,11 +428,11 @@ export const PikachuGame = () => {
       });
 
       // Increase speed over time
-      setCurrentSpeed(prevSpeed => Math.min(prevSpeed + 0.001, 5));
+      setCurrentSpeed(prevSpeed => Math.min(prevSpeed + 0.0006, 4.2));
 
       // Update score (pause during grace periods)
-      const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 2000 && isFlying;
-      const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 5000 && isGengar;
+      const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 3000 && isFlying;
+      const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 6000 && isGengar;
       if (!isInFlyingGracePeriod && !isInGengarGracePeriod) {
         setScore(prevScore => prevScore + 3);
       }
@@ -466,7 +447,7 @@ export const PikachuGame = () => {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [gameState, isJumping, jumpVelocity, player, score, groundY, currentSpeed, flyingObstacles, keys, isFlying, isGengar, gravityUp]);
+  }, [gameState, isJumping, jumpVelocity, player, score, groundY, currentSpeed, flyingObstacles, keys, isFlying, isGengar, gravityUp, gameWidth, flyingModeChangedAt, gengarModeChangedAt, isTopScore]);
 
   // Controls
   useEffect(() => {
@@ -514,7 +495,7 @@ export const PikachuGame = () => {
       <div className="flex flex-col items-center justify-center min-h-screen bg-electric bg-grid">
         <div className="text-center space-y-8">
           <h1 className="game-title">PIKACHU DASH</h1>
-          <div className="text-cyber text-lg">Avoid the spikes and flying obstacles!</div>
+          <div className="text-cyber text-lg">Auto-run through neon stages, leap the spikes, and glide past the ghosts!</div>
           <div className="space-y-4">
             <Button 
               onClick={startGame}
@@ -524,8 +505,8 @@ export const PikachuGame = () => {
             </Button>
             <div className="text-muted-foreground">
               <div className="text-sm mt-2">Press SPACE or click to jump</div>
-              <div className="text-xs mt-1 text-fire">Reach 1000 for FLYING MODE!</div>
-              <div className="text-xs mt-1 text-destructive">Reach 5000 for GENGAR MODE!</div>
+              <div className="text-xs mt-1 text-fire">Reach 1500 for FLYING MODE!</div>
+              <div className="text-xs mt-1 text-destructive">Reach 6000 for GENGAR MODE!</div>
             </div>
           </div>
         </div>
@@ -727,9 +708,9 @@ export const PikachuGame = () => {
       <div className="mt-4 text-muted-foreground text-center">
         <div>
           {isMobile ? (
-            isGengar ? "Tap the screen to switch gravity (Gengar floats up/down)" : (isFlying ? "Tap the screen or use buttons to fly up/down/left/right" : "Tap the screen or use buttons to jump and move")
+            isGengar ? "Tap the screen to flip gravity and glide between ceiling and floor" : (isFlying ? "Tap to jump, swipe up/down, or use the arrows to steer the ship" : "Tap anywhere to jump over the spikes")
           ) : (
-            isGengar ? "Click anywhere or press SPACE to switch gravity (Gengar floats up/down)" : (isFlying ? "Use ARROW KEYS or WASD to fly up/down/left/right" : "Press SPACE or click anywhere to jump")
+            isGengar ? "Press SPACE or click to flip gravity and dodge hazards" : (isFlying ? "Hold ARROW UP/W to rise, release to fall" : "Press SPACE or click to jump while Pikachu auto-runs")
           )}
         </div>
       </div>
@@ -755,30 +736,12 @@ export const PikachuGame = () => {
               </Button>
             </div>
           )}
-          <div className="flex gap-4">
-            <Button
-              onTouchStart={() => setKeys(prev => ({ ...prev, ArrowLeft: true }))}
-              onTouchEnd={() => setKeys(prev => ({ ...prev, ArrowLeft: false }))}
-              className="bg-neon/20 border border-neon text-cyber px-4 py-2 text-sm"
-            >
-              ←
-            </Button>
-            {!isFlying && (
-              <Button
-                onTouchStart={jump}
-                className="bg-neon-green text-black border-neon font-bold px-6 py-2 text-sm"
-              >
-                JUMP
-              </Button>
-            )}
-            <Button
-              onTouchStart={() => setKeys(prev => ({ ...prev, ArrowRight: true }))}
-              onTouchEnd={() => setKeys(prev => ({ ...prev, ArrowRight: false }))}
-              className="bg-neon/20 border border-neon text-cyber px-4 py-2 text-sm"
-            >
-              →
-            </Button>
-          </div>
+          <Button
+            onTouchStart={jump}
+            className="bg-neon-green text-black border-neon font-bold px-6 py-2 text-sm"
+          >
+            {isGengar || isFlying ? "FLIP" : "JUMP"}
+          </Button>
         </div>
       )}
     </div>
