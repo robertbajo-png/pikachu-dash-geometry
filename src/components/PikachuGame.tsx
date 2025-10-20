@@ -41,8 +41,16 @@ const GROUND_HEIGHT = 50;
 const PLAYER_SIZE = 50;
 const SPIKE_WIDTH = 25;
 const SPIKE_HEIGHT = 30;
+ codex/continue-coding-pikachu-dash-0g4c6g
+const JUMP_HEIGHT = 120;
+const GAME_SPEED = 2.2;
+const FLYING_OBSTACLE_SIZE = 35;
+const FLYING_MODE_THRESHOLD = 1500;
+const GENGAR_MODE_THRESHOLD = 6000;
+=======
 const GAME_SPEED = 2.5;
 const FLYING_OBSTACLE_SIZE = 35;
+ main
 const CHARIZARD_SIZE = 50;
 const POWER_UP_SIZE = 32;
 const POWER_UP_DURATION = 5000;
@@ -161,16 +169,19 @@ export const PikachuGame = () => {
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (!touchStart) return;
-    
+
     const touch = e.changedTouches[0];
-    const deltaX = touch.clientX - touchStart.x;
     const deltaY = touch.clientY - touchStart.y;
     const minSwipeDistance = 30;
 
     // Detect tap (short swipe distance)
-    if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+    if (Math.abs(deltaY) < minSwipeDistance) {
       jump();
+ codex/continue-coding-pikachu-dash-0g4c6g
+    } else if (isFlying) {
+=======
     } else if (isFlying && Math.abs(deltaY) > Math.abs(deltaX)) {
+ main
       if (deltaY < -minSwipeDistance) {
         setKeys(prev => ({ ...prev, ArrowUp: true }));
         setTimeout(() => setKeys(prev => ({ ...prev, ArrowUp: false })), 150);
@@ -185,7 +196,11 @@ export const PikachuGame = () => {
 
   const resetGame = useCallback(() => {
     setPlayer({
+ codex/continue-coding-pikachu-dash-0g4c6g
+      x: 80,
+=======
       x: 90,
+ main
       y: groundY - PLAYER_SIZE,
       width: PLAYER_SIZE,
       height: PLAYER_SIZE
@@ -453,12 +468,17 @@ export const PikachuGame = () => {
 
       setPlayer(prevPlayer => {
         let newY = prevPlayer.y;
-        let newX = prevPlayer.x;
+        const maxX = gameWidth - (isFlying ? CHARIZARD_SIZE : isGengar ? PLAYER_SIZE - 14 : PLAYER_SIZE);
+        const targetX = isFlying ? 120 : isGengar ? 90 : 80;
+        const newX = Math.min(Math.max(40, targetX), Math.max(40, maxX));
         let newJumpVelocity = jumpVelocity;
 
+ codex/continue-coding-pikachu-dash-0g4c6g
+=======
         const anchorX = isFlying ? 120 : 90;
         newX = newX + (anchorX - newX) * 0.15;
 
+ main
         if (isFlying) {
           // Flying mode controls
           if (keys['ArrowUp'] || keys['KeyW']) {
@@ -531,6 +551,38 @@ export const PikachuGame = () => {
         return newObstacles;
       });
 
+ codex/continue-coding-pikachu-dash-0g4c6g
+      // Add new spikes (more frequent in flying mode)
+      setSpikes(prevSpikes => {
+        const lastSpike = prevSpikes[prevSpikes.length - 1];
+        const spikeDistance = isFlying ? 320 : 480;
+        
+        // Check grace periods
+        const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 3000 && isFlying;
+        const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 6000 && isGengar;
+        
+        if (!isInFlyingGracePeriod && !isInGengarGracePeriod && (!lastSpike || lastSpike.x < gameWidth - spikeDistance)) {
+          const spikes = [];
+          
+          // Ground spikes
+          spikes.push({
+            id: spikeIdCounter.current++,
+            x: gameWidth,
+            y: groundY - SPIKE_HEIGHT,
+            width: SPIKE_WIDTH,
+            height: SPIKE_HEIGHT
+          });
+          
+          // In flying mode, add ceiling spikes
+          if (isFlying && Math.random() < 0.45) {
+            spikes.push({
+              id: spikeIdCounter.current++,
+              x: gameWidth + (Math.random() * 100),
+              y: 0,
+              width: SPIKE_WIDTH,
+              height: SPIKE_HEIGHT * 2
+            });
+=======
       setPowerUps(prevPowerUps => {
         const movedPowerUps = prevPowerUps
           .map(powerUp => ({ ...powerUp, x: powerUp.x - currentSpeed }))
@@ -542,6 +594,7 @@ export const PikachuGame = () => {
           if (collision) {
             collected = true;
             return false;
+ main
           }
           return true;
         });
@@ -552,7 +605,63 @@ export const PikachuGame = () => {
 
         return remaining;
       });
-
+ codex/continue-coding-pikachu-dash-0g4c6g
+      // Add new flying obstacles (more in flying mode and even more in Gengar mode)
+      setFlyingObstacles(prevObstacles => {
+        const lastObstacle = prevObstacles[prevObstacles.length - 1];
+        const obstacleDistance = isGengar ? 240 : (isFlying ? 360 : 520);
+        
+        // Check grace periods
+        const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 3000 && isFlying;
+        const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 6000 && isGengar;
+        
+        if (!isInFlyingGracePeriod && !isInGengarGracePeriod && (!lastObstacle || lastObstacle.x < gameWidth - obstacleDistance)) {
+          const obstacles = [];
+          
+          if (isGengar) {
+            // Gengar mode - many obstacles at different heights
+            const heights = [80, 140, 200, 260, groundY - 80, groundY - 140];
+            const numObstacles = Math.random() < 0.6 ? 2 : 1;
+            
+            for (let i = 0; i < numObstacles; i++) {
+              const randomHeight = heights[Math.floor(Math.random() * heights.length)];
+              obstacles.push({
+                id: flyingObstacleIdCounter.current++,
+                x: gameWidth + (i * 60),
+                y: randomHeight,
+                width: FLYING_OBSTACLE_SIZE - 10,
+                height: FLYING_OBSTACLE_SIZE - 10,
+                speed: currentSpeed + Math.random() * 2.5
+              });
+            }
+          } else if (isFlying) {
+            // Multiple height levels in flying mode
+            const heights = [80, 160, groundY - 100, groundY - 150];
+            const numObstacles = Math.random() < 0.5 ? 2 : 1;
+            
+            for (let i = 0; i < numObstacles; i++) {
+              const randomHeight = heights[Math.floor(Math.random() * heights.length)];
+              obstacles.push({
+                id: flyingObstacleIdCounter.current++,
+                x: gameWidth + (i * 80),
+                y: randomHeight,
+                width: FLYING_OBSTACLE_SIZE,
+                height: FLYING_OBSTACLE_SIZE,
+                speed: currentSpeed + Math.random() * 2
+              });
+            }
+          } else {
+            const heights = [groundY - 80, groundY - 120, groundY - 160];
+            const randomHeight = heights[Math.floor(Math.random() * heights.length)];
+            obstacles.push({
+              id: flyingObstacleIdCounter.current++,
+              x: gameWidth,
+              y: randomHeight,
+              width: FLYING_OBSTACLE_SIZE,
+              height: FLYING_OBSTACLE_SIZE,
+              speed: currentSpeed + Math.random() * 1.5
+            });
+=======
       levelDistanceRef.current += currentSpeed;
       totalRunDistanceRef.current += currentSpeed;
       eventCountdownRef.current -= currentSpeed;
@@ -576,6 +685,7 @@ export const PikachuGame = () => {
           if (TOTAL_LEVEL_DISTANCE > 0) {
             levelDistanceRef.current = levelDistanceRef.current % TOTAL_LEVEL_DISTANCE;
             setLoopProgress(levelDistanceRef.current);
+ main
           }
           setCurrentSpeed(prev => Math.min(prev + 0.2, GAME_SPEED + 3 + levelLoopRef.current * 0.6));
           eventCountdownRef.current += LEVEL_SCRIPT[0]?.offset ?? Infinity;
@@ -584,6 +694,17 @@ export const PikachuGame = () => {
         }
       }
 
+ codex/continue-coding-pikachu-dash-0g4c6g
+      // Increase speed over time
+      setCurrentSpeed(prevSpeed => Math.min(prevSpeed + 0.0006, 4.2));
+
+      // Update score (pause during grace periods)
+      const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 3000 && isFlying;
+      const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 6000 && isGengar;
+      if (!isInFlyingGracePeriod && !isInGengarGracePeriod) {
+        setScore(prevScore => prevScore + 3);
+      }
+=======
       // Increase speed over time toward the current loop cap
       setCurrentSpeed(prevSpeed => {
         const cap = GAME_SPEED + 2 + (levelLoopRef.current - 1) * 0.5;
@@ -593,6 +714,7 @@ export const PikachuGame = () => {
 
       const nextScore = Math.floor(totalRunDistanceRef.current / 5);
       setScore(prevScore => (nextScore > prevScore ? nextScore : prevScore));
+ main
 
       gameLoopRef.current = requestAnimationFrame(gameLoop);
     };
@@ -604,6 +726,9 @@ export const PikachuGame = () => {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
+ codex/continue-coding-pikachu-dash-0g4c6g
+  }, [gameState, isJumping, jumpVelocity, player, score, groundY, currentSpeed, flyingObstacles, keys, isFlying, isGengar, gravityUp, gameWidth, flyingModeChangedAt, gengarModeChangedAt, isTopScore]);
+=======
   }, [gameState, isJumping, jumpVelocity, player, score, groundY, currentSpeed, flyingObstacles, keys, isFlying, isGengar, gravityUp, isInvincible, activePowerUp, activatePowerUp, flyingY, gameWidth, runLevelEvent, loopProgress, isTopScore]);
 
   useEffect(() => {
@@ -637,6 +762,7 @@ export const PikachuGame = () => {
   const shieldSecondsRemaining = Math.max(Math.ceil(shieldTimeLeft / 1000), 0);
   const progressPercent = TOTAL_LEVEL_DISTANCE > 0 ? Math.min(100, Math.floor((loopProgress / TOTAL_LEVEL_DISTANCE) * 100)) : 0;
   const speedDisplay = currentSpeed.toFixed(1);
+ main
 
   // Controls
   useEffect(() => {
@@ -684,7 +810,7 @@ export const PikachuGame = () => {
       <div className="flex flex-col items-center justify-center min-h-screen bg-electric bg-grid">
         <div className="text-center space-y-8">
           <h1 className="game-title">PIKACHU DASH</h1>
-          <div className="text-cyber text-lg">Avoid the spikes and flying obstacles!</div>
+          <div className="text-cyber text-lg">Auto-run through neon stages, leap the spikes, and glide past the ghosts!</div>
           <div className="space-y-4">
             <Button
               onClick={startGame}
@@ -693,9 +819,15 @@ export const PikachuGame = () => {
               START GAME
             </Button>
             <div className="text-muted-foreground">
+ codex/continue-coding-pikachu-dash-0g4c6g
+              <div className="text-sm mt-2">Press SPACE or click to jump</div>
+              <div className="text-xs mt-1 text-fire">Reach 1500 for FLYING MODE!</div>
+              <div className="text-xs mt-1 text-destructive">Reach 6000 for GENGAR MODE!</div>
+=======
               <div className="text-sm mt-2">Press SPACE or tap to stay on beat—Pikachu dashes automatically.</div>
               <div className="text-xs mt-1 text-neon-cyan">Ride the rockets, steer flight tunnels, and flip gravity like Geometry Dash.</div>
               <div className="text-xs mt-1 text-destructive">Memorise the pattern—one crash resets the whole loop.</div>
+ main
             </div>
           </div>
         </div>
@@ -940,6 +1072,13 @@ export const PikachuGame = () => {
       
       <div className="mt-4 text-muted-foreground text-center">
         <div>
+ codex/continue-coding-pikachu-dash-0g4c6g
+          {isMobile ? (
+            isGengar ? "Tap the screen to flip gravity and glide between ceiling and floor" : (isFlying ? "Tap to jump, swipe up/down, or use the arrows to steer the ship" : "Tap anywhere to jump over the spikes")
+          ) : (
+            isGengar ? "Press SPACE or click to flip gravity and dodge hazards" : (isFlying ? "Hold ARROW UP/W to rise, release to fall" : "Press SPACE or click to jump while Pikachu auto-runs")
+          )}
+=======
           {isMobile
             ? isGengar
               ? 'Tap anywhere to flip gravity between floor and ceiling.'
@@ -954,6 +1093,7 @@ export const PikachuGame = () => {
         </div>
         <div className="text-xs text-neon-cyan mt-2">
           Collect ⚡ orbs to trigger a screen-clearing shield—perfect for memorising tough patterns.
+ main
         </div>
       </div>
 
@@ -980,9 +1120,15 @@ export const PikachuGame = () => {
           )}
           <Button
             onTouchStart={jump}
+codex/continue-coding-pikachu-dash-0g4c6g
+            className="bg-neon-green text-black border-neon font-bold px-6 py-2 text-sm"
+          >
+            {isGengar || isFlying ? "FLIP" : "JUMP"}
+=======
             className="bg-neon-green text-black border-neon font-bold px-8 py-2 text-sm"
           >
             JUMP
+ main
           </Button>
         </div>
       )}
