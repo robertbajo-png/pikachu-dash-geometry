@@ -46,11 +46,10 @@ development server:
    ```bash
    # shorthand helper that defaults to the local dev server
    npm run run
-
-  # force the hosted variant (equivalent to npm run dev:host)
-  npm run run --host
-  # ...or, if you prefer the explicit npm argument separator
-  npm run run -- --host
+   # force the hosted variant (equivalent to npm run dev:host)
+   npm run run --host
+   # ...or, if you prefer the explicit npm argument separator
+   npm run run -- --host
    ```
    The helper also understands `--build` and `--preview` flags if you want to
    chain into a production-style test without memorising the underlying npm
@@ -65,11 +64,12 @@ development server:
    Both dev flavours keep their logs visible by default (`--clearScreen false`).
    If you prefer the old behaviour, append `-- --clearScreen true` to the
    command you launch.
-2. The terminal prints both local and LAN URLs by default (for example,
-   `Local:   http://localhost:5173` and `Network: http://172.30.x.x:5173`).
-   Open whichever address makes sense for your setup. If you need to restrict
-   access back to localhost-only, export `VITE_HOST=localhost` before running
-   the command or append `-- --host localhost` for a single launch.
+2. By default, the banner shows the localhost URL
+   (for example, `Local:   http://localhost:5173`). If you need to share the
+   session across your LAN, run the hosted variant (`npm run run --host`,
+   `npm run dev:host`, or `VITE_HOST=0.0.0.0 npm run dev`) so Vite advertises
+   both the local and network addresses. Use whichever address matches your
+   playtesting setup.
 3. The page hot-reloads automatically as you tweak code, so you can iterate on
    mechanics like the shield power-up in real time.
 
