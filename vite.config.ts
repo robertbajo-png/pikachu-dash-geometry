@@ -7,9 +7,11 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => {
   const server = {} as Record<string, unknown>;
 
-  const requestedHost = process.env.VITE_HOST;
+  const requestedHost = process.env.VITE_HOST?.trim();
   if (requestedHost && requestedHost.length > 0) {
     server.host = requestedHost;
+  } else {
+    server.host = "0.0.0.0";
   }
 
   const requestedPort = process.env.VITE_PORT;

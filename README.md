@@ -65,9 +65,11 @@ development server:
    Both dev flavours keep their logs visible by default (`--clearScreen false`).
    If you prefer the old behaviour, append `-- --clearScreen true` to the
    command you launch.
-2. The terminal prints a local URL, usually `http://localhost:5173` (or the
-   host/port you specified). Open that address in your browser to launch the
-   game.
+2. The terminal prints both local and LAN URLs by default (for example,
+   `Local:   http://localhost:5173` and `Network: http://172.30.x.x:5173`).
+   Open whichever address makes sense for your setup. If you need to restrict
+   access back to localhost-only, export `VITE_HOST=localhost` before running
+   the command or append `-- --host localhost` for a single launch.
 3. The page hot-reloads automatically as you tweak code, so you can iterate on
    mechanics like the shield power-up in real time.
 
