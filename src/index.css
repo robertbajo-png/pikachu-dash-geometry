@@ -8,6 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+codex/continue-coding-pikachu-dash-27rucm
     /* Aurora Slate palette */
     --background: 227 36% 6.5%;
     --foreground: 213 24% 93%;
@@ -119,6 +120,119 @@ All colors MUST be HSL.
     --neon-green: 200 82% 68%;
     --neon-cyan: 199 90% 68%;
     --neon-pink: 286 72% 70%;
+=======
+    /* Professional Midnight Arcade palette */
+    --background: 224 36% 9%;
+    --foreground: 214 32% 92%;
+
+    --card: 225 32% 13%;
+    --card-foreground: 214 32% 92%;
+
+    --popover: 225 32% 13%;
+    --popover-foreground: 214 32% 92%;
+
+    --primary: 222 88% 62%;
+    --primary-foreground: 220 40% 12%;
+
+    --secondary: 222 28% 20%;
+    --secondary-foreground: 214 32% 92%;
+
+    --muted: 222 24% 22%;
+    --muted-foreground: 215 20% 70%;
+
+    --accent: 43 94% 62%;
+    --accent-foreground: 225 32% 13%;
+
+    --destructive: 0 74% 56%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 225 24% 24%;
+    --input: 225 24% 24%;
+    --ring: 222 88% 62%;
+
+    --radius: 0.5rem;
+
+    /* Brand accents */
+    --brand-navy: 227 45% 12%;
+    --brand-indigo: 226 36% 18%;
+    --brand-slate: 220 26% 24%;
+    --brand-sky: 201 74% 52%;
+    --brand-iris: 260 60% 56%;
+    --brand-amber: 40 94% 62%;
+
+    /* Legacy aliases */
+    --electric-blue: 227 45% 18%;
+    --neon-green: 201 74% 52%;
+    --neon-cyan: 222 88% 62%;
+    --neon-pink: 40 94% 62%;
+
+    /* Subtle grid tone */
+    --surface-grid: 223 32% 16%;
+
+    /* Shadows and glows */
+    --glow-primary: 0 20px 50px hsl(var(--primary) / 0.25);
+    --glow-amber: 0 15px 40px hsl(var(--accent) / 0.35);
+
+    --sidebar-background: 225 36% 11%;
+
+    --sidebar-foreground: 210 33% 92%;
+
+    --sidebar-primary: 222 88% 62%;
+
+    --sidebar-primary-foreground: 220 40% 12%;
+
+    --sidebar-accent: 225 32% 16%;
+
+    --sidebar-accent-foreground: 210 33% 92%;
+
+    --sidebar-border: 223 30% 20%;
+
+    --sidebar-ring: 222 88% 62%;
+  }
+
+  .dark {
+    --background: 223 34% 4.8%;
+    --foreground: 210 32% 96%;
+
+    --card: 223 32% 9%;
+    --card-foreground: 210 32% 96%;
+
+    --popover: 223 32% 9%;
+    --popover-foreground: 210 32% 96%;
+
+    --primary: 222 88% 66%;
+    --primary-foreground: 222 30% 12%;
+
+    --secondary: 225 20% 18%;
+    --secondary-foreground: 210 32% 96%;
+
+    --muted: 225 20% 18%;
+    --muted-foreground: 214 26% 74%;
+
+    --accent: 45 94% 64%;
+    --accent-foreground: 222 30% 12%;
+
+    --destructive: 0 70% 46%;
+    --destructive-foreground: 210 32% 96%;
+
+    --border: 225 22% 20%;
+    --input: 225 22% 20%;
+    --ring: 222 88% 66%;
+    --sidebar-background: 225 36% 8%;
+    --sidebar-foreground: 210 32% 96%;
+    --sidebar-primary: 222 88% 66%;
+    --sidebar-primary-foreground: 222 30% 12%;
+    --sidebar-accent: 224 26% 16%;
+    --sidebar-accent-foreground: 210 32% 96%;
+    --sidebar-border: 224 26% 16%;
+    --sidebar-ring: 222 88% 66%;
+
+    /* Legacy aliases */
+    --electric-blue: 227 45% 16%;
+    --neon-green: 201 74% 60%;
+    --neon-cyan: 222 88% 66%;
+    --neon-pink: 45 94% 64%;
+main
   }
 }
 
@@ -129,7 +243,11 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+ codex/continue-coding-pikachu-dash-27rucm
     font-family: 'Outfit', 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+=======
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+ main
   }
 }
 
@@ -137,6 +255,7 @@ All colors MUST be HSL.
 @layer utilities {
   .text-brand-accent {
     color: hsl(var(--accent));
+ codex/continue-coding-pikachu-dash-27rucm
   }
 
   .text-brand-soft {
@@ -149,10 +268,17 @@ All colors MUST be HSL.
 
   .text-brand-gold {
     color: hsl(var(--brand-gold));
+=======
+  }
+
+  .text-brand-soft {
+    color: hsl(var(--brand-sky));
+ main
   }
 
   .border-brand-glow {
     border-color: hsl(var(--primary));
+codex/continue-coding-pikachu-dash-27rucm
     box-shadow: 0 0 0 1px hsl(var(--primary) / 0.45), var(--glow-primary);
   }
 
@@ -162,16 +288,33 @@ All colors MUST be HSL.
 
   .bg-hero-alt {
     background: linear-gradient(150deg, hsl(var(--brand-midnight)), hsl(var(--brand-ice)) 55%, hsl(var(--brand-lilac)));
+=======
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.35), var(--glow-primary);
+  }
+
+  .bg-hero {
+    background: linear-gradient(160deg, hsl(var(--brand-navy)), hsl(var(--brand-indigo)) 55%, hsl(var(--brand-slate)));
+  }
+
+  .bg-hero-alt {
+    background: linear-gradient(160deg, hsl(var(--brand-indigo)), hsl(var(--brand-sky)) 60%, hsl(var(--brand-amber)));
+ main
   }
 
   .pattern-grid {
     background-image:
+ codex/continue-coding-pikachu-dash-27rucm
       radial-gradient(circle at 1px 1px, hsl(var(--surface-grid) / 0.2) 1px, transparent 0);
     background-size: 52px 52px;
+=======
+      radial-gradient(circle at 1px 1px, hsl(var(--surface-grid) / 0.25) 1px, transparent 0);
+    background-size: 48px 48px;
+ main
   }
 
   .pattern-grid-soft {
     background-image:
+ codex/continue-coding-pikachu-dash-27rucm
       radial-gradient(circle at 1px 1px, hsl(var(--brand-ice) / 0.14) 1px, transparent 0);
     background-size: 60px 60px;
   }
@@ -191,5 +334,23 @@ All colors MUST be HSL.
     text-transform: uppercase;
     color: hsl(var(--brand-ice));
     text-shadow: 0 12px 35px hsla(210, 84%, 45%, 0.28);
+=======
+      radial-gradient(circle at 1px 1px, hsl(var(--brand-sky) / 0.15) 1px, transparent 0);
+    background-size: 56px 56px;
+  }
+
+  .panel-glass {
+    background-color: hsl(var(--card) / 0.85);
+    backdrop-filter: blur(18px);
+  }
+
+  .game-title {
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    font-weight: 700;
+    font-size: 2.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: hsl(var(--primary));
+main
   }
 }
