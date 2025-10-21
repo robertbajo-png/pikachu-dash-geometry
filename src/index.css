@@ -8,116 +8,117 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Gaming Electric Theme */
-    --background: 222 84% 8%;
-    --foreground: 184 100% 90%;
+    /* Aurora Slate palette */
+    --background: 227 36% 6.5%;
+    --foreground: 213 24% 93%;
 
-    --card: 222 84% 12%;
-    --card-foreground: 184 100% 90%;
+    --card: 232 32% 11%;
+    --card-foreground: 213 24% 93%;
 
-    --popover: 222 84% 12%;
-    --popover-foreground: 184 100% 90%;
+    --popover: 232 32% 11%;
+    --popover-foreground: 213 24% 93%;
 
-    --primary: 120 100% 50%;
-    --primary-foreground: 222 84% 8%;
+    --primary: 199 88% 60%;
+    --primary-foreground: 210 60% 12%;
 
-    --secondary: 184 100% 50%;
-    --secondary-foreground: 222 84% 8%;
+    --secondary: 232 32% 18%;
+    --secondary-foreground: 213 24% 92%;
 
-    --muted: 222 84% 15%;
-    --muted-foreground: 184 50% 70%;
+    --muted: 232 26% 22%;
+    --muted-foreground: 218 16% 72%;
 
-    --accent: 300 100% 50%;
-    --accent-foreground: 222 84% 8%;
+    --accent: 286 70% 66%;
+    --accent-foreground: 232 32% 14%;
 
-    --destructive: 0 100% 50%;
+    --destructive: 3 78% 58%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 184 50% 30%;
-    --input: 222 84% 15%;
-    --ring: 120 100% 50%;
+    --border: 231 26% 24%;
+    --input: 231 26% 24%;
+    --ring: 199 88% 60%;
 
-    --radius: 0.25rem;
-    
-    /* Game specific colors */
-    --electric-blue: 222 84% 25%;
-    --neon-green: 120 100% 50%;
-    --neon-cyan: 184 100% 50%;
-    --neon-pink: 300 100% 50%;
-    --electric-grid: 222 50% 20%;
-    
-    /* Fire colors */
-    --fire-red: 0 100% 40%;
-    --fire-orange: 15 100% 50%;
-    --fire-yellow: 45 100% 60%;
-    --lava-red: 0 100% 25%;
-    
-    /* Gradients */
-    --gradient-electric: linear-gradient(135deg, hsl(var(--electric-blue)), hsl(var(--background)));
-    --gradient-neon: linear-gradient(90deg, hsl(var(--neon-green)), hsl(var(--neon-cyan)));
-    --gradient-fire: linear-gradient(135deg, hsl(var(--fire-red)), hsl(var(--fire-orange)), hsl(var(--fire-yellow)));
-    --gradient-lava: linear-gradient(180deg, hsl(var(--lava-red)), hsl(var(--fire-red)));
-    
+    --radius: 0.75rem;
+
+    /* Brand accents */
+    --brand-obsidian: 231 38% 8%;
+    --brand-midnight: 232 32% 12%;
+    --brand-ink: 231 30% 18%;
+    --brand-ice: 200 82% 66%;
+    --brand-lilac: 286 70% 66%;
+    --brand-gold: 41 90% 60%;
+
+    /* Legacy aliases */
+    --electric-blue: 229 46% 16%;
+    --neon-green: 200 82% 66%;
+    --neon-cyan: 199 88% 60%;
+    --neon-pink: 286 70% 66%;
+
+    /* Subtle grid tone */
+    --surface-grid: 231 28% 16%;
+
     /* Shadows and glows */
-    --glow-green: 0 0 20px hsl(var(--neon-green) / 0.5);
-    --glow-cyan: 0 0 20px hsl(var(--neon-cyan) / 0.5);
-    --glow-pink: 0 0 20px hsl(var(--neon-pink) / 0.5);
-    --glow-fire: 0 0 25px hsl(var(--fire-orange) / 0.7);
-    --glow-lava: 0 0 30px hsl(var(--fire-red) / 0.6);
+    --glow-primary: 0 24px 54px hsl(var(--primary) / 0.32);
+    --glow-accent: 0 18px 44px hsl(var(--accent) / 0.3);
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 232 36% 10%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-foreground: 210 28% 94%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary: 199 88% 60%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-primary-foreground: 210 60% 12%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent: 231 34% 16%;
 
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-accent-foreground: 210 28% 94%;
 
-    --sidebar-border: 220 13% 91%;
+    --sidebar-border: 231 28% 20%;
 
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 199 88% 60%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 233 36% 5%;
+    --foreground: 210 28% 96%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 232 34% 9%;
+    --card-foreground: 210 28% 96%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 232 34% 9%;
+    --popover-foreground: 210 28% 96%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 199 90% 68%;
+    --primary-foreground: 205 70% 12%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 232 30% 16%;
+    --secondary-foreground: 210 28% 96%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 232 30% 16%;
+    --muted-foreground: 218 20% 76%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 286 72% 70%;
+    --accent-foreground: 232 30% 16%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 3 78% 48%;
+    --destructive-foreground: 210 28% 96%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 231 26% 20%;
+    --input: 231 26% 20%;
+    --ring: 199 90% 68%;
+    --sidebar-background: 232 34% 8%;
+    --sidebar-foreground: 210 28% 96%;
+    --sidebar-primary: 199 90% 68%;
+    --sidebar-primary-foreground: 205 70% 12%;
+    --sidebar-accent: 232 30% 14%;
+    --sidebar-accent-foreground: 210 28% 96%;
+    --sidebar-border: 232 30% 14%;
+    --sidebar-ring: 199 90% 68%;
+
+    /* Legacy aliases */
+    --electric-blue: 229 46% 14%;
+    --neon-green: 200 82% 68%;
+    --neon-cyan: 199 90% 68%;
+    --neon-pink: 286 72% 70%;
   }
 }
 
@@ -128,82 +129,67 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Courier New', monospace;
+    font-family: 'Outfit', 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   }
 }
 
 /* Game utility classes */
 @layer utilities {
-  .text-neon {
-    color: hsl(var(--neon-green));
-    text-shadow: var(--glow-green);
+  .text-brand-accent {
+    color: hsl(var(--accent));
   }
-  
-  .text-cyber {
-    color: hsl(var(--neon-cyan));
-    text-shadow: var(--glow-cyan);
+
+  .text-brand-soft {
+    color: hsl(var(--brand-ice));
   }
-  
-  .border-neon {
-    border-color: hsl(var(--neon-green));
-    box-shadow: var(--glow-green);
+
+  .text-brand-ice {
+    color: hsl(var(--brand-ice));
   }
-  
-  .border-cyber {
-    border-color: hsl(var(--neon-cyan));
-    box-shadow: var(--glow-cyan);
+
+  .text-brand-gold {
+    color: hsl(var(--brand-gold));
   }
-  
-  .bg-electric {
-    background: var(--gradient-electric);
+
+  .border-brand-glow {
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.45), var(--glow-primary);
   }
-  
-  .bg-fire {
-    background: var(--gradient-fire);
-    animation: fire-flicker 2s ease-in-out infinite alternate;
+
+  .bg-hero {
+    background: linear-gradient(140deg, hsl(var(--brand-obsidian)), hsl(var(--brand-midnight)) 55%, hsl(var(--brand-ink)));
   }
-  
-  .bg-grid {
-    background-image: 
-      linear-gradient(hsl(var(--electric-grid)) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--electric-grid)) 1px, transparent 1px);
-    background-size: 50px 50px;
+
+  .bg-hero-alt {
+    background: linear-gradient(150deg, hsl(var(--brand-midnight)), hsl(var(--brand-ice)) 55%, hsl(var(--brand-lilac)));
   }
-  
-  .bg-fire-grid {
-    background-image: 
-      linear-gradient(hsl(var(--fire-orange) / 0.3) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--fire-orange) / 0.3) 1px, transparent 1px);
-    background-size: 30px 30px;
-    animation: grid-pulse 3s ease-in-out infinite;
+
+  .pattern-grid {
+    background-image:
+      radial-gradient(circle at 1px 1px, hsl(var(--surface-grid) / 0.2) 1px, transparent 0);
+    background-size: 52px 52px;
   }
-  
-  .text-fire {
-    color: hsl(var(--fire-orange));
-    text-shadow: var(--glow-fire);
+
+  .pattern-grid-soft {
+    background-image:
+      radial-gradient(circle at 1px 1px, hsl(var(--brand-ice) / 0.14) 1px, transparent 0);
+    background-size: 60px 60px;
   }
-  
-  @keyframes fire-flicker {
-    0% { filter: brightness(1) contrast(1); }
-    50% { filter: brightness(1.1) contrast(1.2); }
-    100% { filter: brightness(0.9) contrast(0.8); }
+
+  .panel-glass {
+    background: linear-gradient(135deg, hsl(var(--card) / 0.92), hsl(var(--card) / 0.78));
+    border: 1px solid hsl(var(--border) / 0.8);
+    backdrop-filter: blur(24px);
+    box-shadow: 0 28px 60px -48px hsla(229, 45%, 7%, 0.9);
   }
-  
-  @keyframes grid-pulse {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 0.8; }
-  }
-  
+
   .game-title {
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 2rem;
-    color: hsl(var(--neon-green));
-    text-shadow: 
-      0 0 10px hsl(var(--neon-green)),
-      0 0 20px hsl(var(--neon-green)),
-      0 0 30px hsl(var(--neon-green));
+    font-family: 'Outfit', 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    font-weight: 700;
+    font-size: 2.4rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    color: hsl(var(--brand-ice));
+    text-shadow: 0 12px 35px hsla(210, 84%, 45%, 0.28);
   }
 }

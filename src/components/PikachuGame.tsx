@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import gengarSprite from "@/assets/gengar-sprite.png";
 import charizardSprite from "@/assets/charizard-sprite.png";
@@ -37,10 +36,10 @@ const PLAYER_SIZE = 50;
 const SPIKE_WIDTH = 25;
 const SPIKE_HEIGHT = 30;
 const JUMP_HEIGHT = 120;
-const GAME_SPEED = 2.5;
+const GAME_SPEED = 2.2;
 const FLYING_OBSTACLE_SIZE = 35;
-const FLYING_MODE_THRESHOLD = 1000;
-const GENGAR_MODE_THRESHOLD = 5000;
+const FLYING_MODE_THRESHOLD = 1500;
+const GENGAR_MODE_THRESHOLD = 6000;
 const CHARIZARD_SIZE = 50;
 
 export const PikachuGame = () => {
@@ -102,43 +101,30 @@ export const PikachuGame = () => {
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (!touchStart) return;
-    
+
     const touch = e.changedTouches[0];
-    const deltaX = touch.clientX - touchStart.x;
     const deltaY = touch.clientY - touchStart.y;
     const minSwipeDistance = 30;
 
     // Detect tap (short swipe distance)
-    if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+    if (Math.abs(deltaY) < minSwipeDistance) {
       jump();
-    } else if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      // Horizontal swipe
-      if (deltaX > minSwipeDistance) {
-        setKeys(prev => ({ ...prev, ArrowRight: true }));
-        setTimeout(() => setKeys(prev => ({ ...prev, ArrowRight: false })), 150);
-      } else if (deltaX < -minSwipeDistance) {
-        setKeys(prev => ({ ...prev, ArrowLeft: true }));
-        setTimeout(() => setKeys(prev => ({ ...prev, ArrowLeft: false })), 150);
-      }
-    } else {
-      // Vertical swipe (flying mode)
-      if (isFlying) {
-        if (deltaY < -minSwipeDistance) {
-          setKeys(prev => ({ ...prev, ArrowUp: true }));
-          setTimeout(() => setKeys(prev => ({ ...prev, ArrowUp: false })), 150);
-        } else if (deltaY > minSwipeDistance) {
-          setKeys(prev => ({ ...prev, ArrowDown: true }));
-          setTimeout(() => setKeys(prev => ({ ...prev, ArrowDown: false })), 150);
-        }
+    } else if (isFlying) {
+      if (deltaY < -minSwipeDistance) {
+        setKeys(prev => ({ ...prev, ArrowUp: true }));
+        setTimeout(() => setKeys(prev => ({ ...prev, ArrowUp: false })), 150);
+      } else if (deltaY > minSwipeDistance) {
+        setKeys(prev => ({ ...prev, ArrowDown: true }));
+        setTimeout(() => setKeys(prev => ({ ...prev, ArrowDown: false })), 150);
       }
     }
-    
+
     setTouchStart(null);
   };
 
   const resetGame = useCallback(() => {
     setPlayer({
-      x: 50,
+      x: 80,
       y: groundY - PLAYER_SIZE,
       width: PLAYER_SIZE,
       height: PLAYER_SIZE
@@ -180,9 +166,9 @@ export const PikachuGame = () => {
     await clearHighScores();
   };
 
-  const isTopScore = (currentScore: number) => {
+  const isTopScore = useCallback((currentScore: number) => {
     return topScores.length < 3 || currentScore > topScores[topScores.length - 1].score;
-  };
+  }, [topScores]);
 
   const addTopScoreToSupabase = async (name: string, score: number) => {
     await addHighScore(name.trim(), score);
@@ -266,16 +252,10 @@ export const PikachuGame = () => {
     const gameLoop = () => {
       setPlayer(prevPlayer => {
         let newY = prevPlayer.y;
-        let newX = prevPlayer.x;
+        const maxX = gameWidth - (isFlying ? CHARIZARD_SIZE : isGengar ? PLAYER_SIZE - 14 : PLAYER_SIZE);
+        const targetX = isFlying ? 120 : isGengar ? 90 : 80;
+        const newX = Math.min(Math.max(40, targetX), Math.max(40, maxX));
         let newJumpVelocity = jumpVelocity;
-
-        // Handle horizontal movement
-        if (keys['ArrowLeft'] || keys['KeyA']) {
-          newX = Math.max(0, newX - 6);
-        }
-        if (keys['ArrowRight'] || keys['KeyD']) {
-          newX = Math.min(gameWidth - (isFlying ? CHARIZARD_SIZE : isGengar ? PLAYER_SIZE - 14 : PLAYER_SIZE), newX + 6);
-        }
 
         if (isFlying) {
           // Flying mode controls
@@ -350,11 +330,11 @@ export const PikachuGame = () => {
       // Add new spikes (more frequent in flying mode)
       setSpikes(prevSpikes => {
         const lastSpike = prevSpikes[prevSpikes.length - 1];
-        const spikeDistance = isFlying ? 200 : 350;
+        const spikeDistance = isFlying ? 320 : 480;
         
         // Check grace periods
-        const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 2000 && isFlying;
-        const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 5000 && isGengar;
+        const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 3000 && isFlying;
+        const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 6000 && isGengar;
         
         if (!isInFlyingGracePeriod && !isInGengarGracePeriod && (!lastSpike || lastSpike.x < gameWidth - spikeDistance)) {
           const spikes = [];
@@ -369,7 +349,7 @@ export const PikachuGame = () => {
           });
           
           // In flying mode, add ceiling spikes
-          if (isFlying && Math.random() < 0.6) {
+          if (isFlying && Math.random() < 0.45) {
             spikes.push({
               id: spikeIdCounter.current++,
               x: gameWidth + (Math.random() * 100),
@@ -387,19 +367,19 @@ export const PikachuGame = () => {
       // Add new flying obstacles (more in flying mode and even more in Gengar mode)
       setFlyingObstacles(prevObstacles => {
         const lastObstacle = prevObstacles[prevObstacles.length - 1];
-        const obstacleDistance = isGengar ? 150 : (isFlying ? 250 : 400);
+        const obstacleDistance = isGengar ? 240 : (isFlying ? 360 : 520);
         
         // Check grace periods
-        const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 2000 && isFlying;
-        const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 5000 && isGengar;
+        const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 3000 && isFlying;
+        const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 6000 && isGengar;
         
         if (!isInFlyingGracePeriod && !isInGengarGracePeriod && (!lastObstacle || lastObstacle.x < gameWidth - obstacleDistance)) {
           const obstacles = [];
           
           if (isGengar) {
             // Gengar mode - many obstacles at different heights
-            const heights = [50, 100, 150, 200, 250, groundY - 80, groundY - 120, groundY - 160, groundY - 200];
-            const numObstacles = Math.random() < 0.8 ? 3 : 2;
+            const heights = [80, 140, 200, 260, groundY - 80, groundY - 140];
+            const numObstacles = Math.random() < 0.6 ? 2 : 1;
             
             for (let i = 0; i < numObstacles; i++) {
               const randomHeight = heights[Math.floor(Math.random() * heights.length)];
@@ -414,8 +394,8 @@ export const PikachuGame = () => {
             }
           } else if (isFlying) {
             // Multiple height levels in flying mode
-            const heights = [50, 120, 200, groundY - 80, groundY - 120, groundY - 160];
-            const numObstacles = Math.random() < 0.7 ? 2 : 1;
+            const heights = [80, 160, groundY - 100, groundY - 150];
+            const numObstacles = Math.random() < 0.5 ? 2 : 1;
             
             for (let i = 0; i < numObstacles; i++) {
               const randomHeight = heights[Math.floor(Math.random() * heights.length)];
@@ -447,11 +427,11 @@ export const PikachuGame = () => {
       });
 
       // Increase speed over time
-      setCurrentSpeed(prevSpeed => Math.min(prevSpeed + 0.001, 5));
+      setCurrentSpeed(prevSpeed => Math.min(prevSpeed + 0.0006, 4.2));
 
       // Update score (pause during grace periods)
-      const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 2000 && isFlying;
-      const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 5000 && isGengar;
+      const isInFlyingGracePeriod = flyingModeChangedAt && (Date.now() - flyingModeChangedAt) < 3000 && isFlying;
+      const isInGengarGracePeriod = gengarModeChangedAt && (Date.now() - gengarModeChangedAt) < 6000 && isGengar;
       if (!isInFlyingGracePeriod && !isInGengarGracePeriod) {
         setScore(prevScore => prevScore + 3);
       }
@@ -466,7 +446,7 @@ export const PikachuGame = () => {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [gameState, isJumping, jumpVelocity, player, score, groundY, currentSpeed, flyingObstacles, keys, isFlying, isGengar, gravityUp]);
+  }, [gameState, isJumping, jumpVelocity, player, score, groundY, currentSpeed, flyingObstacles, keys, isFlying, isGengar, gravityUp, gameWidth, flyingModeChangedAt, gengarModeChangedAt, isTopScore]);
 
   // Controls
   useEffect(() => {
@@ -511,21 +491,25 @@ export const PikachuGame = () => {
 
   if (gameState === 'menu') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-electric bg-grid">
-        <div className="text-center space-y-8">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-hero pattern-grid px-4 py-12">
+        <div className="panel-glass max-w-xl rounded-3xl px-10 py-12 text-center shadow-[0_32px_95px_-48px_hsla(230,52%,8%,0.88)]">
           <h1 className="game-title">PIKACHU DASH</h1>
-          <div className="text-cyber text-lg">Avoid the spikes and flying obstacles!</div>
-          <div className="space-y-4">
-            <Button 
+          <p className="mx-auto mt-6 max-w-md text-lg leading-relaxed text-brand-soft">
+            Glide through aurora-lit skylines, time your jumps with measured cadence, and ease into the Geometry Dash rhythm.
+          </p>
+          <div className="mt-10 flex flex-col items-center gap-4">
+            <Button
               onClick={startGame}
-              className="bg-neon-green text-black border-neon font-bold px-8 py-4 text-lg hover:bg-neon-green/80"
+              className="rounded-full bg-primary px-10 py-4 text-lg font-semibold text-primary-foreground shadow-lg shadow-primary/35 transition hover:-translate-y-0.5 hover:bg-primary/90"
             >
-              START GAME
+              Begin run
             </Button>
-            <div className="text-muted-foreground">
-              <div className="text-sm mt-2">Press SPACE or click to jump</div>
-              <div className="text-xs mt-1 text-fire">Reach 1000 for FLYING MODE!</div>
-              <div className="text-xs mt-1 text-destructive">Reach 5000 for GENGAR MODE!</div>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <div>
+                Press <span className="font-medium text-foreground">SPACE</span> or click to jump.
+              </div>
+              <div className="text-xs uppercase tracking-[0.32em] text-brand-accent">1500 unlocks flight</div>
+              <div className="text-xs uppercase tracking-[0.32em] text-destructive">6000 unlocks Gengar mode</div>
             </div>
           </div>
         </div>
@@ -534,35 +518,54 @@ export const PikachuGame = () => {
   }
 
   return (
-    <div className={`flex flex-col items-center justify-center min-h-screen ${isFlying ? 'bg-fire bg-fire-grid' : 'bg-electric bg-grid'}`}>
+    <div className={`relative flex min-h-screen flex-col items-center justify-center ${isFlying ? 'bg-hero-alt pattern-grid-soft' : 'bg-hero pattern-grid'}`}>
       {/* Top 3 High Scores - Responsive positioning */}
-      <div className={`absolute top-4 right-4 bg-black/80 rounded-lg border-2 border-neon-cyan shadow-lg ${isMobile ? 'p-2 text-xs' : 'p-4'}`}>
-        <div className={`text-center text-cyber font-bold mb-2 ${isMobile ? 'text-sm' : 'text-lg mb-3'}`}>TOP 3 🏆</div>
+      <div
+        className={`absolute right-6 top-6 panel-glass rounded-2xl shadow-[0_22px_70px_-42px_hsla(230,46%,6%,0.85)] backdrop-blur ${isMobile ? 'px-3 py-3 text-xs' : 'px-5 py-4 text-sm'}`}
+      >
+        <div className={`mb-2 text-center text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground ${isMobile ? '' : 'mb-3 text-sm'}`}>
+          Top scores
+        </div>
         {isLoadingScores ? (
-          <div className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>Loading...</div>
+          <div className="text-muted-foreground">Loading...</div>
         ) : topScores.length > 0 ? (
           topScores.map((entry, index) => (
-            <div key={index} className={`flex justify-between items-center mb-1 ${isMobile ? 'text-xs min-w-[120px]' : 'text-sm mb-2 min-w-[150px]'}`}>
-              <span className="text-neon-green font-bold">{index + 1}. {entry.name}</span>
-              <span className={`text-cyber ${isMobile ? 'ml-2' : 'ml-3'}`}>{entry.score}</span>
+            <div
+              key={index}
+              className={`flex items-center justify-between gap-4 ${isMobile ? 'min-w-[120px]' : 'min-w-[180px]'}`}
+            >
+              <span
+                className={`font-semibold ${index === 0 ? 'text-brand-accent' : index === 1 ? 'text-brand-soft' : 'text-muted-foreground'}`}
+              >
+                {index + 1}. {entry.name}
+              </span>
+              <span className="font-semibold text-foreground">{entry.score}</span>
             </div>
           ))
         ) : (
-          <div className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>No scores yet</div>
+          <div className="text-muted-foreground">No scores yet</div>
         )}
       </div>
 
-      <div className="mb-4 flex gap-8 text-center">
-        <div className="text-cyber">
-          <div className="text-2xl font-bold">{score}</div>
-          <div className="text-sm">SCORE</div>
-          {isFlying && <div className="text-xs text-neon animate-pulse">FLYING MODE!</div>}
-          {isGengar && <div className="text-xs text-destructive animate-pulse">GENGAR MODE!</div>}
+      <div className="mb-6 flex gap-10 text-center text-brand-soft">
+        <div>
+          <div className="text-3xl font-semibold text-brand-ice">{score}</div>
+          <div className="mt-1 text-xs uppercase tracking-[0.3em] text-muted-foreground">Score</div>
+          {isFlying && (
+            <div className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand-accent">
+              Flying mode
+            </div>
+          )}
+          {isGengar && (
+            <div className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-destructive">
+              Gengar mode
+            </div>
+          )}
         </div>
       </div>
       
-      <div 
-        className="relative overflow-hidden" 
+      <div
+        className="panel-glass relative overflow-hidden rounded-[32px] shadow-[0_35px_92px_-50px_hsla(230,50%,7%,0.92)]"
         style={{ width: gameWidth, height: gameHeight }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -571,15 +574,15 @@ export const PikachuGame = () => {
         {isMobile && (gameState === 'playing' || gameState === 'paused') && (
           <Button
             onClick={() => setGameState(gameState === 'playing' ? 'paused' : 'playing')}
-            className="absolute top-2 right-2 z-10 bg-neon/20 border border-neon text-cyber px-3 py-1 text-sm hover:bg-neon/30"
+            className="absolute right-4 top-4 z-10 rounded-full bg-secondary/70 px-3 py-1 text-xs font-medium text-foreground transition hover:bg-secondary"
           >
             {gameState === 'playing' ? '⏸️' : '▶️'}
           </Button>
         )}
-        
+
         {/* Ground */}
-        <div 
-          className="absolute bottom-0 w-full bg-neon-green/20 border-t border-neon-green"
+        <div
+          className="absolute bottom-0 w-full border-t border-primary/30 bg-primary/10"
           style={{ height: GROUND_HEIGHT }}
         />
         
@@ -598,7 +601,7 @@ export const PikachuGame = () => {
               <img 
                 src={charizardSprite}
                 alt="Charizard" 
-                className="w-full h-full object-contain animate-pulse-neon bg-transparent"
+                className="w-full h-full object-contain animate-focus-glow bg-transparent"
               />
               <img 
                 src="/lovable-uploads/2c373f45-ab6b-45ba-a70a-8609e02d54cd.png"
@@ -610,13 +613,13 @@ export const PikachuGame = () => {
             <img 
               src={gengarSprite}
               alt="Gengar" 
-              className="w-full h-full object-contain animate-pulse-neon bg-transparent"
+              className="w-full h-full object-contain animate-focus-glow bg-transparent"
             />
           ) : (
             <img 
               src="/lovable-uploads/2c373f45-ab6b-45ba-a70a-8609e02d54cd.png"
               alt="Pikachu" 
-              className="w-full h-full object-contain animate-pulse-neon bg-transparent"
+              className="w-full h-full object-contain animate-focus-glow bg-transparent"
             />
           )}
         </div>
@@ -657,66 +660,66 @@ export const PikachuGame = () => {
         ))}
 
         {gameState === 'nameInput' && (
-          <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
-            <div className="text-center space-y-4 bg-card p-6 rounded border border-neon-cyan">
-              <h2 className="text-neon text-2xl font-bold">TOP 3 SCORE!</h2>
-              <div className="text-cyber text-lg">Score: {score}</div>
-              <div className="text-muted-foreground">Enter your name (max 10 letters):</div>
+          <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <div className="panel-glass w-full max-w-sm rounded-2xl px-6 py-7 text-center shadow-[0_28px_70px_-40px_hsla(230,52%,8%,0.85)]">
+              <h2 className="text-2xl font-semibold text-brand-gold">Top 3 score!</h2>
+              <div className="text-brand-ice text-lg">Score: {score}</div>
+              <div className="text-sm text-muted-foreground">Enter your name (max 10 letters):</div>
               <input
                 type="text"
                 value={playerName}
                 onChange={(e) => setPlayerName(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleNameSubmit()}
                 maxLength={10}
-                className="bg-input text-foreground px-3 py-2 rounded border border-border text-center uppercase"
+                className="w-full rounded-lg border border-border bg-background/70 px-3 py-2 text-center text-base uppercase text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 placeholder="YOUR NAME"
                 autoFocus
               />
-              <Button 
+              <Button
                 onClick={handleNameSubmit}
                 disabled={!playerName.trim()}
-                className="bg-neon-green text-black border-neon font-bold px-6 py-3 hover:bg-neon-green/80"
+                className="w-full rounded-full bg-primary py-3 font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition hover:bg-primary/90 disabled:opacity-50"
               >
-                SAVE SCORE
+                Save score
               </Button>
             </div>
           </div>
         )}
 
         {gameState === 'paused' && (
-          <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
-            <div className="text-center space-y-4">
-              <h2 className="text-neon text-3xl font-bold">PAUSED</h2>
-              <div className="text-cyber text-lg">Score: {score}</div>
-              <Button 
+          <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <div className="panel-glass rounded-2xl px-8 py-6 text-center shadow-[0_26px_72px_-44px_hsla(230,52%,8%,0.86)]">
+              <h2 className="text-3xl font-semibold text-brand-ice">Paused</h2>
+              <div className="text-brand-soft text-lg">Score: {score}</div>
+              <Button
                 onClick={() => setGameState('playing')}
-                className="bg-neon-green text-black border-neon font-bold px-6 py-3 hover:bg-neon-green/80"
+                className="mt-4 rounded-full bg-primary px-8 py-3 font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition hover:bg-primary/90"
               >
-                RESUME
+                Resume run
               </Button>
-              <div className="text-muted-foreground text-sm">Press ESC to resume</div>
+              <div className="mt-3 text-sm text-muted-foreground">Press ESC to resume</div>
             </div>
           </div>
         )}
 
         {gameState === 'gameOver' && (
-          <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
-            <div className="text-center space-y-4">
-              <h2 className="text-destructive text-3xl font-bold">GAME OVER</h2>
-              <div className="text-cyber text-xl">Final Score: {score}</div>
-              <div className="flex gap-4 justify-center">
-                <Button 
+          <div className="absolute inset-0 flex items-center justify-center bg-black/65 backdrop-blur-sm">
+            <div className="panel-glass rounded-2xl px-8 py-7 text-center shadow-[0_26px_72px_-44px_hsla(230,52%,8%,0.86)]">
+              <h2 className="text-3xl font-semibold text-destructive">Game over</h2>
+              <div className="text-brand-ice text-xl">Final Score: {score}</div>
+              <div className="mt-5 flex flex-wrap justify-center gap-4">
+                <Button
                   onClick={startGame}
-                  className="bg-neon-green text-black border-neon font-bold px-6 py-3 hover:bg-neon-green/80"
+                  className="rounded-full bg-primary px-8 py-3 font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition hover:bg-primary/90"
                 >
-                  PLAY AGAIN
+                  Play again
                 </Button>
-                <Button 
+                <Button
                   onClick={resetHighScore}
                   variant="outline"
-                  className="border-destructive text-destructive hover:bg-destructive hover:text-white px-4 py-3"
+                  className="rounded-full border border-destructive px-6 py-3 font-semibold text-destructive transition hover:bg-destructive hover:text-white"
                 >
-                  RESET SCORES
+                  Reset scores
                 </Button>
               </div>
             </div>
@@ -724,61 +727,49 @@ export const PikachuGame = () => {
         )}
       </div>
       
-      <div className="mt-4 text-muted-foreground text-center">
-        <div>
-          {isMobile ? (
-            isGengar ? "Tap the screen to switch gravity (Gengar floats up/down)" : (isFlying ? "Tap the screen or use buttons to fly up/down/left/right" : "Tap the screen or use buttons to jump and move")
-          ) : (
-            isGengar ? "Click anywhere or press SPACE to switch gravity (Gengar floats up/down)" : (isFlying ? "Use ARROW KEYS or WASD to fly up/down/left/right" : "Press SPACE or click anywhere to jump")
-          )}
-        </div>
+      <div className="mt-5 max-w-xl text-center text-sm text-muted-foreground">
+        {isMobile ? (
+          isGengar
+            ? "Tap anywhere to flip gravity and weave through the mirrored lanes."
+            : isFlying
+              ? "Tap to jump, then swipe up or down to sculpt your glide path."
+              : "Tap anywhere to vault over rhythm spikes while Pikachu auto-runs."
+        ) : (
+          isGengar
+            ? "Press SPACE or click to invert gravity and thread the aurora gaps."
+            : isFlying
+              ? "Hold ARROW UP/W to climb, release to descend across the glide route."
+              : "Press SPACE or click to jump—Pikachu sustains the forward pace."
+        )}
       </div>
 
       {/* Mobile Control Buttons */}
       {isMobile && gameState === 'playing' && (
-        <div className="mt-4 flex flex-col items-center gap-3">
+        <div className="mt-6 flex flex-col items-center gap-4">
           {isFlying && (
             <div className="flex gap-4">
               <Button
                 onTouchStart={() => setKeys(prev => ({ ...prev, ArrowUp: true }))}
                 onTouchEnd={() => setKeys(prev => ({ ...prev, ArrowUp: false }))}
-                className="bg-neon/20 border border-neon text-cyber px-4 py-2 text-sm"
+                className="rounded-full border border-border bg-secondary/80 px-4 py-2 text-sm text-foreground shadow-sm transition hover:bg-secondary"
               >
                 ↑
               </Button>
               <Button
                 onTouchStart={() => setKeys(prev => ({ ...prev, ArrowDown: true }))}
                 onTouchEnd={() => setKeys(prev => ({ ...prev, ArrowDown: false }))}
-                className="bg-neon/20 border border-neon text-cyber px-4 py-2 text-sm"
+                className="rounded-full border border-border bg-secondary/80 px-4 py-2 text-sm text-foreground shadow-sm transition hover:bg-secondary"
               >
                 ↓
               </Button>
             </div>
           )}
-          <div className="flex gap-4">
-            <Button
-              onTouchStart={() => setKeys(prev => ({ ...prev, ArrowLeft: true }))}
-              onTouchEnd={() => setKeys(prev => ({ ...prev, ArrowLeft: false }))}
-              className="bg-neon/20 border border-neon text-cyber px-4 py-2 text-sm"
-            >
-              ←
-            </Button>
-            {!isFlying && (
-              <Button
-                onTouchStart={jump}
-                className="bg-neon-green text-black border-neon font-bold px-6 py-2 text-sm"
-              >
-                JUMP
-              </Button>
-            )}
-            <Button
-              onTouchStart={() => setKeys(prev => ({ ...prev, ArrowRight: true }))}
-              onTouchEnd={() => setKeys(prev => ({ ...prev, ArrowRight: false }))}
-              className="bg-neon/20 border border-neon text-cyber px-4 py-2 text-sm"
-            >
-              →
-            </Button>
-          </div>
+          <Button
+            onTouchStart={jump}
+            className="rounded-full bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition hover:bg-primary/90"
+          >
+            {isGengar || isFlying ? "Flip" : "Jump"}
+          </Button>
         </div>
       )}
     </div>
