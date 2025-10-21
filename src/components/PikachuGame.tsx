@@ -43,6 +43,11 @@ const SPIKE_HEIGHT = 30;
  codex/continue-coding-pikachu-dash-0g4c6g
 const JUMP_HEIGHT = 120;
 const GAME_SPEED = 2.2;
+ codex/continue-coding-pikachu-dash-27rucm
+const FLYING_OBSTACLE_SIZE = 35;
+const FLYING_MODE_THRESHOLD = 1500;
+const GENGAR_MODE_THRESHOLD = 6000;
+=======
  codex/continue-coding-pikachu-dash-hwbk3v
 const FLYING_OBSTACLE_SIZE = 35;
 const FLYING_MODE_THRESHOLD = 1500;
@@ -182,6 +187,9 @@ export const PikachuGame = () => {
     // Detect tap (short swipe distance)
     if (Math.abs(deltaY) < minSwipeDistance) {
       jump();
+ codex/continue-coding-pikachu-dash-27rucm
+    } else if (isFlying) {
+=======
 codex/continue-coding-pikachu-dash-hwbk3v
     } else if (isFlying) {
 =======
@@ -189,6 +197,7 @@ codex/continue-coding-pikachu-dash-hwbk3v
     } else if (isFlying) {
 =======
     } else if (isFlying && Math.abs(deltaY) > Math.abs(deltaX)) {
+ main
  main
  main
       if (deltaY < -minSwipeDistance) {
@@ -205,6 +214,9 @@ codex/continue-coding-pikachu-dash-hwbk3v
 
   const resetGame = useCallback(() => {
     setPlayer({
+ codex/continue-coding-pikachu-dash-27rucm
+      x: 80,
+=======
  codex/continue-coding-pikachu-dash-hwbk3v
       x: 80,
 =======
@@ -212,6 +224,7 @@ codex/continue-coding-pikachu-dash-hwbk3v
       x: 80,
 =======
       x: 90,
+ main
  main
  main
       y: groundY - PLAYER_SIZE,
@@ -486,6 +499,8 @@ codex/continue-coding-pikachu-dash-hwbk3v
         const newX = Math.min(Math.max(40, targetX), Math.max(40, maxX));
         let newJumpVelocity = jumpVelocity;
 
+ codex/continue-coding-pikachu-dash-27rucm
+=======
  codex/continue-coding-pikachu-dash-hwbk3v
 =======
  codex/continue-coding-pikachu-dash-0g4c6g
@@ -493,6 +508,7 @@ codex/continue-coding-pikachu-dash-hwbk3v
         const anchorX = isFlying ? 120 : 90;
         newX = newX + (anchorX - newX) * 0.15;
 
+ main
  main
  main
         if (isFlying) {
@@ -742,6 +758,9 @@ codex/continue-coding-pikachu-dash-hwbk3v
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
+ codex/continue-coding-pikachu-dash-27rucm
+  }, [gameState, isJumping, jumpVelocity, player, score, groundY, currentSpeed, flyingObstacles, keys, isFlying, isGengar, gravityUp, gameWidth, flyingModeChangedAt, gengarModeChangedAt, isTopScore]);
+=======
  codex/continue-coding-pikachu-dash-hwbk3v
   }, [gameState, isJumping, jumpVelocity, player, score, groundY, currentSpeed, flyingObstacles, keys, isFlying, isGengar, gravityUp, gameWidth, flyingModeChangedAt, gengarModeChangedAt, isTopScore]);
 =======
@@ -781,6 +800,7 @@ codex/continue-coding-pikachu-dash-hwbk3v
   const shieldSecondsRemaining = Math.max(Math.ceil(shieldTimeLeft / 1000), 0);
   const progressPercent = TOTAL_LEVEL_DISTANCE > 0 ? Math.min(100, Math.floor((loopProgress / TOTAL_LEVEL_DISTANCE) * 100)) : 0;
   const speedDisplay = currentSpeed.toFixed(1);
+ main
  main
  main
 
@@ -827,6 +847,27 @@ codex/continue-coding-pikachu-dash-hwbk3v
 
   if (gameState === 'menu') {
     return (
+ codex/continue-coding-pikachu-dash-27rucm
+      <div className="flex min-h-screen flex-col items-center justify-center bg-hero pattern-grid px-4 py-12">
+        <div className="panel-glass max-w-xl rounded-3xl px-10 py-12 text-center shadow-[0_32px_95px_-48px_hsla(230,52%,8%,0.88)]">
+          <h1 className="game-title">PIKACHU DASH</h1>
+          <p className="mx-auto mt-6 max-w-md text-lg leading-relaxed text-brand-soft">
+            Glide through aurora-lit skylines, time your jumps with measured cadence, and ease into the Geometry Dash rhythm.
+          </p>
+          <div className="mt-10 flex flex-col items-center gap-4">
+            <Button
+              onClick={startGame}
+              className="rounded-full bg-primary px-10 py-4 text-lg font-semibold text-primary-foreground shadow-lg shadow-primary/35 transition hover:-translate-y-0.5 hover:bg-primary/90"
+            >
+              Begin run
+            </Button>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <div>
+                Press <span className="font-medium text-foreground">SPACE</span> or click to jump.
+              </div>
+              <div className="text-xs uppercase tracking-[0.32em] text-brand-accent">1500 unlocks flight</div>
+              <div className="text-xs uppercase tracking-[0.32em] text-destructive">6000 unlocks Gengar mode</div>
+=======
       <div className="flex min-h-screen flex-col items-center justify-center bg-hero pattern-grid px-4 py-10">
         <div className="panel-glass max-w-xl rounded-3xl border border-border px-10 py-12 text-center shadow-2xl shadow-black/40">
           <h1 className="game-title">PIKACHU DASH</h1>
@@ -862,6 +903,7 @@ codex/continue-coding-pikachu-dash-hwbk3v
               <div className="text-xs mt-1 text-destructive">Memorise the pattern—one crash resets the whole loop.</div>
  main
  main
+ main
             </div>
           </div>
         </div>
@@ -873,7 +915,11 @@ codex/continue-coding-pikachu-dash-hwbk3v
     <div className={`relative flex min-h-screen flex-col items-center justify-center ${isFlying ? 'bg-hero-alt pattern-grid-soft' : 'bg-hero pattern-grid'}`}>
       {/* Top 3 High Scores - Responsive positioning */}
       <div
+ codex/continue-coding-pikachu-dash-27rucm
+        className={`absolute right-6 top-6 panel-glass rounded-2xl shadow-[0_22px_70px_-42px_hsla(230,46%,6%,0.85)] backdrop-blur ${isMobile ? 'px-3 py-3 text-xs' : 'px-5 py-4 text-sm'}`}
+=======
         className={`absolute right-6 top-6 panel-glass rounded-2xl border border-border shadow-xl shadow-black/40 backdrop-blur ${isMobile ? 'px-3 py-3 text-xs' : 'px-5 py-4 text-sm'}`}
+ main
       >
         <div className={`mb-2 text-center text-xs font-semibold uppercase tracking-[0.35em] text-muted-foreground ${isMobile ? '' : 'mb-3 text-sm'}`}>
           Top scores
@@ -884,10 +930,21 @@ codex/continue-coding-pikachu-dash-hwbk3v
           topScores.map((entry, index) => (
             <div
               key={index}
+ codex/continue-coding-pikachu-dash-27rucm
+              className={`flex items-center justify-between gap-4 ${isMobile ? 'min-w-[120px]' : 'min-w-[180px]'}`}
+            >
+              <span
+                className={`font-semibold ${index === 0 ? 'text-brand-accent' : index === 1 ? 'text-brand-soft' : 'text-muted-foreground'}`}
+              >
+                {index + 1}. {entry.name}
+              </span>
+              <span className="font-semibold text-foreground">{entry.score}</span>
+=======
               className={`flex items-center justify-between gap-4 ${isMobile ? 'min-w-[120px]' : 'min-w-[160px]'}`}
             >
               <span className="font-semibold text-brand-soft">{index + 1}. {entry.name}</span>
               <span className="font-semibold text-foreground/90">{entry.score}</span>
+ main
             </div>
           ))
         ) : (
@@ -895,10 +952,16 @@ codex/continue-coding-pikachu-dash-hwbk3v
         )}
       </div>
 
+ codex/continue-coding-pikachu-dash-27rucm
+      <div className="mb-6 flex gap-10 text-center text-brand-soft">
+        <div>
+          <div className="text-3xl font-semibold text-brand-ice">{score}</div>
+=======
  codex/continue-coding-pikachu-dash-hwbk3v
       <div className="mb-6 flex gap-10 text-center text-brand-soft">
         <div>
           <div className="text-3xl font-semibold text-foreground">{score}</div>
+ main
           <div className="mt-1 text-xs uppercase tracking-[0.3em] text-muted-foreground">Score</div>
           {isFlying && (
             <div className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand-accent">
@@ -910,6 +973,8 @@ codex/continue-coding-pikachu-dash-hwbk3v
               Gengar mode
             </div>
           )}
+codex/continue-coding-pikachu-dash-27rucm
+=======
 =======
       <div className={`mb-4 flex flex-wrap items-stretch justify-center gap-4 text-center ${isMobile ? 'max-w-sm' : ''}`}>
         <div className="text-cyber bg-black/40 border border-neon/40 rounded-lg px-4 py-3 min-w-[140px]">
@@ -938,11 +1003,16 @@ codex/continue-coding-pikachu-dash-hwbk3v
             />
           </div>
  main
+ main
         </div>
       </div>
       
       <div
+ codex/continue-coding-pikachu-dash-27rucm
+        className="panel-glass relative overflow-hidden rounded-[32px] shadow-[0_35px_92px_-50px_hsla(230,50%,7%,0.92)]"
+=======
         className="panel-glass relative overflow-hidden rounded-[32px] border border-border shadow-[0_35px_90px_-45px_rgba(6,7,16,0.9)]"
+ main
         style={{ width: gameWidth, height: gameHeight }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -980,6 +1050,8 @@ codex/continue-coding-pikachu-dash-hwbk3v
                 src={charizardSprite}
                 alt="Charizard" 
                 className="w-full h-full object-contain animate-focus-glow bg-transparent"
+ codex/continue-coding-pikachu-dash-27rucm
+=======
 =======
           <div className="relative w-full h-full flex items-center justify-center">
             {activePowerUp && (
@@ -1006,6 +1078,7 @@ codex/continue-coding-pikachu-dash-hwbk3v
                 src={gengarSprite}
                 alt="Gengar"
                 className="w-full h-full object-contain animate-pulse-neon bg-transparent"
+ main
  main
               />
             ) : (
@@ -1088,9 +1161,15 @@ codex/continue-coding-pikachu-dash-hwbk3v
 
         {gameState === 'nameInput' && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+codex/continue-coding-pikachu-dash-27rucm
+            <div className="panel-glass w-full max-w-sm rounded-2xl px-6 py-7 text-center shadow-[0_28px_70px_-40px_hsla(230,52%,8%,0.85)]">
+              <h2 className="text-2xl font-semibold text-brand-gold">Top 3 score!</h2>
+              <div className="text-brand-ice text-lg">Score: {score}</div>
+=======
             <div className="panel-glass w-full max-w-sm rounded-2xl border border-border px-6 py-7 text-center shadow-xl shadow-black/40">
               <h2 className="text-2xl font-semibold text-brand-accent">Top 3 score!</h2>
               <div className="text-brand-soft text-lg">Score: {score}</div>
+ main
               <div className="text-sm text-muted-foreground">Enter your name (max 10 letters):</div>
               <input
                 type="text"
@@ -1115,8 +1194,13 @@ codex/continue-coding-pikachu-dash-hwbk3v
 
         {gameState === 'paused' && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+ codex/continue-coding-pikachu-dash-27rucm
+            <div className="panel-glass rounded-2xl px-8 py-6 text-center shadow-[0_26px_72px_-44px_hsla(230,52%,8%,0.86)]">
+              <h2 className="text-3xl font-semibold text-brand-ice">Paused</h2>
+=======
             <div className="panel-glass rounded-2xl border border-border px-8 py-6 text-center shadow-xl shadow-black/40">
               <h2 className="text-3xl font-semibold text-brand-accent">Paused</h2>
+ main
               <div className="text-brand-soft text-lg">Score: {score}</div>
               <Button
                 onClick={() => setGameState('playing')}
@@ -1131,9 +1215,15 @@ codex/continue-coding-pikachu-dash-hwbk3v
 
         {gameState === 'gameOver' && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/65 backdrop-blur-sm">
+ codex/continue-coding-pikachu-dash-27rucm
+            <div className="panel-glass rounded-2xl px-8 py-7 text-center shadow-[0_26px_72px_-44px_hsla(230,52%,8%,0.86)]">
+              <h2 className="text-3xl font-semibold text-destructive">Game over</h2>
+              <div className="text-brand-ice text-xl">Final Score: {score}</div>
+=======
             <div className="panel-glass rounded-2xl border border-border px-8 py-7 text-center shadow-xl shadow-black/40">
               <h2 className="text-3xl font-semibold text-destructive">Game over</h2>
               <div className="text-brand-soft text-xl">Final Score: {score}</div>
+ main
               <div className="mt-5 flex flex-wrap justify-center gap-4">
                 <Button
                   onClick={startGame}
@@ -1154,6 +1244,22 @@ codex/continue-coding-pikachu-dash-hwbk3v
         )}
       </div>
       
+ codex/continue-coding-pikachu-dash-27rucm
+      <div className="mt-5 max-w-xl text-center text-sm text-muted-foreground">
+        {isMobile ? (
+          isGengar
+            ? "Tap anywhere to flip gravity and weave through the mirrored lanes."
+            : isFlying
+              ? "Tap to jump, then swipe up or down to sculpt your glide path."
+              : "Tap anywhere to vault over rhythm spikes while Pikachu auto-runs."
+        ) : (
+          isGengar
+            ? "Press SPACE or click to invert gravity and thread the aurora gaps."
+            : isFlying
+              ? "Hold ARROW UP/W to climb, release to descend across the glide route."
+              : "Press SPACE or click to jump—Pikachu sustains the forward pace."
+        )}
+=======
  codex/continue-coding-pikachu-dash-hwbk3v
       <div className="mt-5 max-w-xl text-center text-sm text-muted-foreground">
         {isMobile ? (
@@ -1196,6 +1302,7 @@ codex/continue-coding-pikachu-dash-hwbk3v
  main
         </div>
  main
+ main
       </div>
 
       {/* Mobile Control Buttons */}
@@ -1221,6 +1328,11 @@ codex/continue-coding-pikachu-dash-hwbk3v
           )}
           <Button
             onTouchStart={jump}
+ codex/continue-coding-pikachu-dash-27rucm
+            className="rounded-full bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition hover:bg-primary/90"
+          >
+            {isGengar || isFlying ? "Flip" : "Jump"}
+=======
  codex/continue-coding-pikachu-dash-hwbk3v
             className="rounded-full bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition hover:bg-primary/90"
           >
@@ -1234,6 +1346,7 @@ codex/continue-coding-pikachu-dash-0g4c6g
             className="bg-neon-green text-black border-neon font-bold px-8 py-2 text-sm"
           >
             JUMP
+ main
  main
  main
           </Button>

@@ -8,6 +8,119 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+codex/continue-coding-pikachu-dash-27rucm
+    /* Aurora Slate palette */
+    --background: 227 36% 6.5%;
+    --foreground: 213 24% 93%;
+
+    --card: 232 32% 11%;
+    --card-foreground: 213 24% 93%;
+
+    --popover: 232 32% 11%;
+    --popover-foreground: 213 24% 93%;
+
+    --primary: 199 88% 60%;
+    --primary-foreground: 210 60% 12%;
+
+    --secondary: 232 32% 18%;
+    --secondary-foreground: 213 24% 92%;
+
+    --muted: 232 26% 22%;
+    --muted-foreground: 218 16% 72%;
+
+    --accent: 286 70% 66%;
+    --accent-foreground: 232 32% 14%;
+
+    --destructive: 3 78% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 231 26% 24%;
+    --input: 231 26% 24%;
+    --ring: 199 88% 60%;
+
+    --radius: 0.75rem;
+
+    /* Brand accents */
+    --brand-obsidian: 231 38% 8%;
+    --brand-midnight: 232 32% 12%;
+    --brand-ink: 231 30% 18%;
+    --brand-ice: 200 82% 66%;
+    --brand-lilac: 286 70% 66%;
+    --brand-gold: 41 90% 60%;
+
+    /* Legacy aliases */
+    --electric-blue: 229 46% 16%;
+    --neon-green: 200 82% 66%;
+    --neon-cyan: 199 88% 60%;
+    --neon-pink: 286 70% 66%;
+
+    /* Subtle grid tone */
+    --surface-grid: 231 28% 16%;
+
+    /* Shadows and glows */
+    --glow-primary: 0 24px 54px hsl(var(--primary) / 0.32);
+    --glow-accent: 0 18px 44px hsl(var(--accent) / 0.3);
+
+    --sidebar-background: 232 36% 10%;
+
+    --sidebar-foreground: 210 28% 94%;
+
+    --sidebar-primary: 199 88% 60%;
+
+    --sidebar-primary-foreground: 210 60% 12%;
+
+    --sidebar-accent: 231 34% 16%;
+
+    --sidebar-accent-foreground: 210 28% 94%;
+
+    --sidebar-border: 231 28% 20%;
+
+    --sidebar-ring: 199 88% 60%;
+  }
+
+  .dark {
+    --background: 233 36% 5%;
+    --foreground: 210 28% 96%;
+
+    --card: 232 34% 9%;
+    --card-foreground: 210 28% 96%;
+
+    --popover: 232 34% 9%;
+    --popover-foreground: 210 28% 96%;
+
+    --primary: 199 90% 68%;
+    --primary-foreground: 205 70% 12%;
+
+    --secondary: 232 30% 16%;
+    --secondary-foreground: 210 28% 96%;
+
+    --muted: 232 30% 16%;
+    --muted-foreground: 218 20% 76%;
+
+    --accent: 286 72% 70%;
+    --accent-foreground: 232 30% 16%;
+
+    --destructive: 3 78% 48%;
+    --destructive-foreground: 210 28% 96%;
+
+    --border: 231 26% 20%;
+    --input: 231 26% 20%;
+    --ring: 199 90% 68%;
+    --sidebar-background: 232 34% 8%;
+    --sidebar-foreground: 210 28% 96%;
+    --sidebar-primary: 199 90% 68%;
+    --sidebar-primary-foreground: 205 70% 12%;
+    --sidebar-accent: 232 30% 14%;
+    --sidebar-accent-foreground: 210 28% 96%;
+    --sidebar-border: 232 30% 14%;
+    --sidebar-ring: 199 90% 68%;
+
+    /* Legacy aliases */
+    --electric-blue: 229 46% 14%;
+    --neon-green: 200 82% 68%;
+    --neon-cyan: 199 90% 68%;
+    --neon-pink: 286 72% 70%;
+=======
     /* Professional Midnight Arcade palette */
     --background: 224 36% 9%;
     --foreground: 214 32% 92%;
@@ -119,6 +232,7 @@ All colors MUST be HSL.
     --neon-green: 201 74% 60%;
     --neon-cyan: 222 88% 66%;
     --neon-pink: 45 94% 64%;
+main
   }
 }
 
@@ -129,7 +243,11 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+ codex/continue-coding-pikachu-dash-27rucm
+    font-family: 'Outfit', 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+=======
     font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+ main
   }
 }
 
@@ -137,14 +255,40 @@ All colors MUST be HSL.
 @layer utilities {
   .text-brand-accent {
     color: hsl(var(--accent));
+ codex/continue-coding-pikachu-dash-27rucm
+  }
+
+  .text-brand-soft {
+    color: hsl(var(--brand-ice));
+  }
+
+  .text-brand-ice {
+    color: hsl(var(--brand-ice));
+  }
+
+  .text-brand-gold {
+    color: hsl(var(--brand-gold));
+=======
   }
 
   .text-brand-soft {
     color: hsl(var(--brand-sky));
+ main
   }
 
   .border-brand-glow {
     border-color: hsl(var(--primary));
+codex/continue-coding-pikachu-dash-27rucm
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.45), var(--glow-primary);
+  }
+
+  .bg-hero {
+    background: linear-gradient(140deg, hsl(var(--brand-obsidian)), hsl(var(--brand-midnight)) 55%, hsl(var(--brand-ink)));
+  }
+
+  .bg-hero-alt {
+    background: linear-gradient(150deg, hsl(var(--brand-midnight)), hsl(var(--brand-ice)) 55%, hsl(var(--brand-lilac)));
+=======
     box-shadow: 0 0 0 1px hsl(var(--primary) / 0.35), var(--glow-primary);
   }
 
@@ -154,16 +298,43 @@ All colors MUST be HSL.
 
   .bg-hero-alt {
     background: linear-gradient(160deg, hsl(var(--brand-indigo)), hsl(var(--brand-sky)) 60%, hsl(var(--brand-amber)));
+ main
   }
 
   .pattern-grid {
     background-image:
+ codex/continue-coding-pikachu-dash-27rucm
+      radial-gradient(circle at 1px 1px, hsl(var(--surface-grid) / 0.2) 1px, transparent 0);
+    background-size: 52px 52px;
+=======
       radial-gradient(circle at 1px 1px, hsl(var(--surface-grid) / 0.25) 1px, transparent 0);
     background-size: 48px 48px;
+ main
   }
 
   .pattern-grid-soft {
     background-image:
+ codex/continue-coding-pikachu-dash-27rucm
+      radial-gradient(circle at 1px 1px, hsl(var(--brand-ice) / 0.14) 1px, transparent 0);
+    background-size: 60px 60px;
+  }
+
+  .panel-glass {
+    background: linear-gradient(135deg, hsl(var(--card) / 0.92), hsl(var(--card) / 0.78));
+    border: 1px solid hsl(var(--border) / 0.8);
+    backdrop-filter: blur(24px);
+    box-shadow: 0 28px 60px -48px hsla(229, 45%, 7%, 0.9);
+  }
+
+  .game-title {
+    font-family: 'Outfit', 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    font-weight: 700;
+    font-size: 2.4rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: hsl(var(--brand-ice));
+    text-shadow: 0 12px 35px hsla(210, 84%, 45%, 0.28);
+=======
       radial-gradient(circle at 1px 1px, hsl(var(--brand-sky) / 0.15) 1px, transparent 0);
     background-size: 56px 56px;
   }
@@ -180,5 +351,6 @@ All colors MUST be HSL.
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: hsl(var(--primary));
+main
   }
 }
