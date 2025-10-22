@@ -1,0 +1,23 @@
+<svg width="256" height="160" viewBox="0 0 256 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="160" rx="24" fill="#fef3c7"/>
+  <g filter="url(#shadow)">
+    <path d="M56 102C56 76 84 44 128 44C172 44 200 76 200 102C200 126 182 138 154 138H102C74 138 56 126 56 102Z" fill="#d97745"/>
+    <path d="M76 96C76 76 94 60 118 60H138C162 60 180 76 180 96C180 114 166 122 146 122H110C90 122 76 114 76 96Z" fill="#f9a66c"/>
+    <path d="M88 78C88 70 94 64 102 64C110 64 116 70 116 78" stroke="#4c1d0b" stroke-width="4" stroke-linecap="round"/>
+    <path d="M168 78C168 70 162 64 154 64C146 64 140 70 140 78" stroke="#4c1d0b" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="104" cy="90" r="6" fill="#4c1d0b"/>
+    <circle cx="152" cy="90" r="6" fill="#4c1d0b"/>
+    <path d="M120 104C126 108 134 110 142 104" stroke="#4c1d0b" stroke-width="5" stroke-linecap="round"/>
+    <path d="M64 86C56 86 52 72 58 64C64 56 74 62 76 74" stroke="#d97745" stroke-width="6" stroke-linecap="round"/>
+    <path d="M192 86C200 86 204 72 198 64C192 56 182 62 180 74" stroke="#d97745" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <defs>
+    <filter id="shadow" x="40" y="36" width="176" height="120" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feOffset dy="6"/>
+      <feGaussianBlur stdDeviation="10"/>
+      <feComposite in2="SourceAlpha" operator="out"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.2 0 0 0 0 0.11 0 0 0 0 0.08 0 0 0 0.25 0"/>
+      <feBlend in="SourceGraphic"/>
+    </filter>
+  </defs>
+</svg>

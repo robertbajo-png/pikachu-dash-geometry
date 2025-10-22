@@ -2,355 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-codex/continue-coding-pikachu-dash-27rucm
-    /* Aurora Slate palette */
-    --background: 227 36% 6.5%;
-    --foreground: 213 24% 93%;
-
-    --card: 232 32% 11%;
-    --card-foreground: 213 24% 93%;
-
-    --popover: 232 32% 11%;
-    --popover-foreground: 213 24% 93%;
-
-    --primary: 199 88% 60%;
-    --primary-foreground: 210 60% 12%;
-
-    --secondary: 232 32% 18%;
-    --secondary-foreground: 213 24% 92%;
-
-    --muted: 232 26% 22%;
-    --muted-foreground: 218 16% 72%;
-
-    --accent: 286 70% 66%;
-    --accent-foreground: 232 32% 14%;
-
-    --destructive: 3 78% 58%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 231 26% 24%;
-    --input: 231 26% 24%;
-    --ring: 199 88% 60%;
-
+    --background: 220 47% 8%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 12%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 12%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 222 92% 62%;
+    --primary-foreground: 215 28% 12%;
+    --secondary: 222 32% 20%;
+    --secondary-foreground: 210 36% 94%;
+    --muted: 222 25% 24%;
+    --muted-foreground: 214 20% 72%;
+    --accent: 43 96% 62%;
+    --accent-foreground: 222 47% 12%;
+    --destructive: 0 84% 58%;
+    --destructive-foreground: 210 36% 96%;
+    --border: 222 32% 22%;
+    --input: 222 32% 20%;
+    --ring: 222 92% 62%;
     --radius: 0.75rem;
-
-    /* Brand accents */
-    --brand-obsidian: 231 38% 8%;
-    --brand-midnight: 232 32% 12%;
-    --brand-ink: 231 30% 18%;
-    --brand-ice: 200 82% 66%;
-    --brand-lilac: 286 70% 66%;
-    --brand-gold: 41 90% 60%;
-
-    /* Legacy aliases */
-    --electric-blue: 229 46% 16%;
-    --neon-green: 200 82% 66%;
-    --neon-cyan: 199 88% 60%;
-    --neon-pink: 286 70% 66%;
-
-    /* Subtle grid tone */
-    --surface-grid: 231 28% 16%;
-
-    /* Shadows and glows */
-    --glow-primary: 0 24px 54px hsl(var(--primary) / 0.32);
-    --glow-accent: 0 18px 44px hsl(var(--accent) / 0.3);
-
-    --sidebar-background: 232 36% 10%;
-
-    --sidebar-foreground: 210 28% 94%;
-
-    --sidebar-primary: 199 88% 60%;
-
-    --sidebar-primary-foreground: 210 60% 12%;
-
-    --sidebar-accent: 231 34% 16%;
-
-    --sidebar-accent-foreground: 210 28% 94%;
-
-    --sidebar-border: 231 28% 20%;
-
-    --sidebar-ring: 199 88% 60%;
-  }
-
-  .dark {
-    --background: 233 36% 5%;
-    --foreground: 210 28% 96%;
-
-    --card: 232 34% 9%;
-    --card-foreground: 210 28% 96%;
-
-    --popover: 232 34% 9%;
-    --popover-foreground: 210 28% 96%;
-
-    --primary: 199 90% 68%;
-    --primary-foreground: 205 70% 12%;
-
-    --secondary: 232 30% 16%;
-    --secondary-foreground: 210 28% 96%;
-
-    --muted: 232 30% 16%;
-    --muted-foreground: 218 20% 76%;
-
-    --accent: 286 72% 70%;
-    --accent-foreground: 232 30% 16%;
-
-    --destructive: 3 78% 48%;
-    --destructive-foreground: 210 28% 96%;
-
-    --border: 231 26% 20%;
-    --input: 231 26% 20%;
-    --ring: 199 90% 68%;
-    --sidebar-background: 232 34% 8%;
-    --sidebar-foreground: 210 28% 96%;
-    --sidebar-primary: 199 90% 68%;
-    --sidebar-primary-foreground: 205 70% 12%;
-    --sidebar-accent: 232 30% 14%;
-    --sidebar-accent-foreground: 210 28% 96%;
-    --sidebar-border: 232 30% 14%;
-    --sidebar-ring: 199 90% 68%;
-
-    /* Legacy aliases */
-    --electric-blue: 229 46% 14%;
-    --neon-green: 200 82% 68%;
-    --neon-cyan: 199 90% 68%;
-    --neon-pink: 286 72% 70%;
-=======
-    /* Professional Midnight Arcade palette */
-    --background: 224 36% 9%;
-    --foreground: 214 32% 92%;
-
-    --card: 225 32% 13%;
-    --card-foreground: 214 32% 92%;
-
-    --popover: 225 32% 13%;
-    --popover-foreground: 214 32% 92%;
-
-    --primary: 222 88% 62%;
-    --primary-foreground: 220 40% 12%;
-
-    --secondary: 222 28% 20%;
-    --secondary-foreground: 214 32% 92%;
-
-    --muted: 222 24% 22%;
-    --muted-foreground: 215 20% 70%;
-
-    --accent: 43 94% 62%;
-    --accent-foreground: 225 32% 13%;
-
-    --destructive: 0 74% 56%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 225 24% 24%;
-    --input: 225 24% 24%;
-    --ring: 222 88% 62%;
-
-    --radius: 0.5rem;
-
-    /* Brand accents */
-    --brand-navy: 227 45% 12%;
-    --brand-indigo: 226 36% 18%;
-    --brand-slate: 220 26% 24%;
-    --brand-sky: 201 74% 52%;
-    --brand-iris: 260 60% 56%;
-    --brand-amber: 40 94% 62%;
-
-    /* Legacy aliases */
-    --electric-blue: 227 45% 18%;
-    --neon-green: 201 74% 52%;
-    --neon-cyan: 222 88% 62%;
-    --neon-pink: 40 94% 62%;
-
-    /* Subtle grid tone */
-    --surface-grid: 223 32% 16%;
-
-    /* Shadows and glows */
-    --glow-primary: 0 20px 50px hsl(var(--primary) / 0.25);
-    --glow-amber: 0 15px 40px hsl(var(--accent) / 0.35);
-
-    --sidebar-background: 225 36% 11%;
-
-    --sidebar-foreground: 210 33% 92%;
-
-    --sidebar-primary: 222 88% 62%;
-
-    --sidebar-primary-foreground: 220 40% 12%;
-
-    --sidebar-accent: 225 32% 16%;
-
-    --sidebar-accent-foreground: 210 33% 92%;
-
-    --sidebar-border: 223 30% 20%;
-
-    --sidebar-ring: 222 88% 62%;
-  }
-
-  .dark {
-    --background: 223 34% 4.8%;
-    --foreground: 210 32% 96%;
-
-    --card: 223 32% 9%;
-    --card-foreground: 210 32% 96%;
-
-    --popover: 223 32% 9%;
-    --popover-foreground: 210 32% 96%;
-
-    --primary: 222 88% 66%;
-    --primary-foreground: 222 30% 12%;
-
-    --secondary: 225 20% 18%;
-    --secondary-foreground: 210 32% 96%;
-
-    --muted: 225 20% 18%;
-    --muted-foreground: 214 26% 74%;
-
-    --accent: 45 94% 64%;
-    --accent-foreground: 222 30% 12%;
-
-    --destructive: 0 70% 46%;
-    --destructive-foreground: 210 32% 96%;
-
-    --border: 225 22% 20%;
-    --input: 225 22% 20%;
-    --ring: 222 88% 66%;
-    --sidebar-background: 225 36% 8%;
-    --sidebar-foreground: 210 32% 96%;
-    --sidebar-primary: 222 88% 66%;
-    --sidebar-primary-foreground: 222 30% 12%;
-    --sidebar-accent: 224 26% 16%;
-    --sidebar-accent-foreground: 210 32% 96%;
-    --sidebar-border: 224 26% 16%;
-    --sidebar-ring: 222 88% 66%;
-
-    /* Legacy aliases */
-    --electric-blue: 227 45% 16%;
-    --neon-green: 201 74% 60%;
-    --neon-cyan: 222 88% 66%;
-    --neon-pink: 45 94% 64%;
-main
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground;
- codex/continue-coding-pikachu-dash-27rucm
-    font-family: 'Outfit', 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-=======
-    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
- main
-  }
-}
-
-/* Game utility classes */
-@layer utilities {
-  .text-brand-accent {
-    color: hsl(var(--accent));
- codex/continue-coding-pikachu-dash-27rucm
+    min-height: 100vh;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-image: radial-gradient(circle at top, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.94));
   }
 
-  .text-brand-soft {
-    color: hsl(var(--brand-ice));
+  * {
+    border-color: hsl(var(--border));
   }
 
-  .text-brand-ice {
-    color: hsl(var(--brand-ice));
-  }
-
-  .text-brand-gold {
-    color: hsl(var(--brand-gold));
-=======
-  }
-
-  .text-brand-soft {
-    color: hsl(var(--brand-sky));
- main
-  }
-
-  .border-brand-glow {
-    border-color: hsl(var(--primary));
-codex/continue-coding-pikachu-dash-27rucm
-    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.45), var(--glow-primary);
-  }
-
-  .bg-hero {
-    background: linear-gradient(140deg, hsl(var(--brand-obsidian)), hsl(var(--brand-midnight)) 55%, hsl(var(--brand-ink)));
-  }
-
-  .bg-hero-alt {
-    background: linear-gradient(150deg, hsl(var(--brand-midnight)), hsl(var(--brand-ice)) 55%, hsl(var(--brand-lilac)));
-=======
-    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.35), var(--glow-primary);
-  }
-
-  .bg-hero {
-    background: linear-gradient(160deg, hsl(var(--brand-navy)), hsl(var(--brand-indigo)) 55%, hsl(var(--brand-slate)));
-  }
-
-  .bg-hero-alt {
-    background: linear-gradient(160deg, hsl(var(--brand-indigo)), hsl(var(--brand-sky)) 60%, hsl(var(--brand-amber)));
- main
-  }
-
-  .pattern-grid {
-    background-image:
- codex/continue-coding-pikachu-dash-27rucm
-      radial-gradient(circle at 1px 1px, hsl(var(--surface-grid) / 0.2) 1px, transparent 0);
-    background-size: 52px 52px;
-=======
-      radial-gradient(circle at 1px 1px, hsl(var(--surface-grid) / 0.25) 1px, transparent 0);
-    background-size: 48px 48px;
- main
-  }
-
-  .pattern-grid-soft {
-    background-image:
- codex/continue-coding-pikachu-dash-27rucm
-      radial-gradient(circle at 1px 1px, hsl(var(--brand-ice) / 0.14) 1px, transparent 0);
-    background-size: 60px 60px;
-  }
-
-  .panel-glass {
-    background: linear-gradient(135deg, hsl(var(--card) / 0.92), hsl(var(--card) / 0.78));
-    border: 1px solid hsl(var(--border) / 0.8);
-    backdrop-filter: blur(24px);
-    box-shadow: 0 28px 60px -48px hsla(229, 45%, 7%, 0.9);
-  }
-
-  .game-title {
-    font-family: 'Outfit', 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-    font-weight: 700;
-    font-size: 2.4rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: hsl(var(--brand-ice));
-    text-shadow: 0 12px 35px hsla(210, 84%, 45%, 0.28);
-=======
-      radial-gradient(circle at 1px 1px, hsl(var(--brand-sky) / 0.15) 1px, transparent 0);
-    background-size: 56px 56px;
-  }
-
-  .panel-glass {
-    background-color: hsl(var(--card) / 0.85);
-    backdrop-filter: blur(18px);
-  }
-
-  .game-title {
-    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-    font-weight: 700;
-    font-size: 2.5rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: hsl(var(--primary));
-main
+  body,
+  button,
+  input,
+  textarea {
+    font-family: "Inter", "SF Pro Display", "Segoe UI", sans-serif;
   }
 }
